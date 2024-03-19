@@ -3,13 +3,16 @@ import pymysql
 import pymysql.cursors
 import random
 import authentification.signup as auth
+import os
+from dotenv import load_dotenv
 
+load_dotenv(override=True)
 app = Flask(__name__)
 conn = pymysql.connect(
-        host='localhost',
-        user='user1',
-        password='A4umTeF4B62*z3c3P*q!j9',
-        db='dev' )
+        host= os.environ.get("HOST"),
+        user= os.environ.get("USER"),
+        password= os.environ.get("PASSWORD"),
+        db= os.environ.get("DATABASE") )
 cur = conn.cursor()
 
 @app.route("/")
