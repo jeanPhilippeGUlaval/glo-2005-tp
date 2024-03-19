@@ -9,7 +9,7 @@ conn = pymysql.connect(
         host='localhost',
         user='user1',
         password='A4umTeF4B62*z3c3P*q!j9',
-        db='test' )
+        db='dev' )
 cur = conn.cursor()
 
 @app.route("/")
