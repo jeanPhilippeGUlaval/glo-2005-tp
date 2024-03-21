@@ -1,0 +1,3 @@
+USE dev;
+DROP TABLE users;
+DROP DATABASE dev;
