@@ -7,15 +7,16 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Static Top Navbar Example for Bootstrap</title>
+    <title>Liste de Prix</title>
 
     <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../static/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
     <link href="../static/css/navbar-static-top.css" rel="stylesheet">
     <script src="../static/assets/js/ie-emulation-modes-warning.js"></script>
-  </head>
 
+  </head>
   <body>
+    <!-- Top NavBar -->
     <nav class="navbar navbar-default navbar-static-top">
       <div class="container">
         <div class="navbar-header">
@@ -25,26 +26,59 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Entreprise X</a>
+          <a class="navbar-brand" href="/home">Entreprise X</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href="listeDePrix?title=Porte%20de%20Garage&table=porte">Liste de produits</a></li>
+            <li class="active"><a href="#">Liste de produits</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="soumission">Soumission</a></li>
+            <li><a href="/soumission">Soumission</a></li>
             <li><a href="">Profile</a></li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
       </div>
     </nav>
-
-
+    <!-- Sidebar -->
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <li><a href="/listeDePrix?title=Porte%20de%20Garage&table=porte">Porte de Garage</a></li>
+        <li><a href="/listeDePrix?title=Panneau%20de%20Porte&table=porte">Panneaux de porte</a></li>
+        <li><a href="/listeDePrix?title=Ferronerie&table=porte">Ferronerie</a></li>
+      </ul>
+    </div>
+    <!-- Container -->
     <div class="container">
-      <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
-        <h1>Travail Pratique GLO-2005</h1>
-        <p>Ceci est un TP pour le cours de GLO-2005 2024</p>
+      <form class="navbar-form navbar-right">
+        <input type="text" class="form-control" placeholder="Search...">
+      </form>
+      <h2 class="sub-header">{{lsDePrix}}</h2>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  {% for row in headers %}
+                    <th onclick="OrderBy('{{tableId}}','{{lsDePrix}}','{{row}}')" onfocus="">{{ row }}</th>
+                  {% endfor %}
+                  <th>Quantité</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in data %}
+                <tr>
+                    {% for cell in row %}
+                      <td>{{ cell }}</td>
+                    {% endfor %}
+                    <td>    
+                      <input class="quantity-show" type="number" id='{{row[0]}}' value="0" min="0">
+                      <button>Ajouter</button>
+                    </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -52,6 +86,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <script>window.jQuery || document.write('<script src="../static/assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="../static/dist/js/bootstrap.min.js"></script>
+    <script src="../static/js/listeDePrix.js"></script>
     <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
   </body>
 </html>
