@@ -9,3 +9,8 @@ body {
 .quantity-show {
 width: 50px;
 }
+
+.custom_button_padding {
+  padding-top: 30px;
+  padding-left: 20%;
+}

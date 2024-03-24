@@ -26,7 +26,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="home">Entreprise X</a>
+          <a class="navbar-brand" href="/home">Entreprise X</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -59,18 +59,15 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title" id="myModalLabel">Créer une soumission</h4>
           </div>
-          <form class="form-add-soumission" action="addSoumission" method="post">
+          <form class="form-add-soumission" action="/soumission/addSoumission" method="post">
             <div class="modal-body">
-              {% if error != "" %}
-                <div class="alert alert-warning" role="alert">{{error}}</div>
-              {% endif %}
               <p>Entrez l'indentifiant de la soumission</p>
               <div class="alert alert-warning" role="alert">Aucun espace est accepté. Seulement des caractères.</div>
-              <input type="email" name="inputSoumissionID" id="inputSoumissionID" class="form-control" placeholder="Identifiant de la soumission" required autofocus>
+              <input name="inputSoumissionID" id="inputSoumissionID" class="form-control" placeholder="Identifiant de la soumission" required autofocus>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button class="btn btn-primary" type="submit" value="addSoumission">Save changes</button>
+              <button class="btn btn-primary" type="submit" value="/soumission/addSoumission">Save changes</button>
             </div>
           </form>
         </div>
@@ -78,7 +75,14 @@
     </div>
     <!-- Container -->
     <div class="container">
-      <h2 class="sub-header">{{soumissionID}}</h2>
+      <div class="row">
+        <div class="col-xs-12 col-md-8">
+          <h2 class="sub-header">{{soumissionID}}</h2>
+        </div>
+        <div class="col-xs-6 col-md-4 custom_button_padding">
+          <button type="submit" class="btn btn-danger" onclick="deleteSoumission('{{soumissionID}}')" >Supprimer la soumission</button>
+        </div>
+      </div>
           <div class="table-responsive">
             <table class="table table-striped">
               <thead>
@@ -108,5 +112,6 @@
     <script>window.jQuery || document.write('<script src="../static/assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="../static/dist/js/bootstrap.min.js"></script>
     <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="../static/js/soumission.js"></script>
   </body>
 </html>
