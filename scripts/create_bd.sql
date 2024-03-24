@@ -20,7 +20,7 @@ END//
 DELIMITER ;
 
 
-INSERT INTO soumission_ids VALUES ("Soumission_1");
-INSERT INTO soumission VALUES ("Soumission_1", "PORTE-1","CABANON", 800);
+-- INSERT INTO soumission_ids VALUES ("Soumission_1");
+-- INSERT INTO soumission VALUES ("Soumission_1", "PORTE-1","CABANON", 800);
 
-DELETE FROM soumission_ids WHERE ID = 'Soumission_1';
+-- DELETE FROM soumission_ids WHERE ID = 'Soumission_1';
