@@ -43,8 +43,8 @@
     <div class="col-sm-3 col-md-2 sidebar">
       <ul class="nav nav-sidebar">
         <li><a href="/listeDePrix?title=Porte%20de%20Garage&table=porte">Porte de Garage</a></li>
-        <li><a href="/listeDePrix?title=Panneau%20de%20Porte&table=porte">Panneaux de porte</a></li>
-        <li><a href="/listeDePrix?title=Ferronerie&table=porte">Ferronerie</a></li>
+        <li><a href="/listeDePrix?title=Panneaux%20de%20Porte&table=panneaux">Panneaux de porte</a></li>
+        <li><a href="/listeDePrix?title=Ferronnerie&table=ferronnerie">Ferronerie</a></li>
       </ul>
     </div>
     <!-- Container -->
@@ -61,6 +61,7 @@
                     <th onclick="OrderBy('{{tableId}}','{{lsDePrix}}','{{row}}')" onfocus="">{{ row }}</th>
                   {% endfor %}
                   <th>Quantité</th>
+                  <th>Soumission</th>
                 </tr>
               </thead>
               <tbody>
@@ -69,9 +70,26 @@
                     {% for cell in row %}
                       <td>{{ cell }}</td>
                     {% endfor %}
-                    <td>    
-                      <input class="quantity-show" type="number" id='{{row[0]}}' value="0" min="0">
-                      <button>Ajouter</button>
+                    <td>
+                      <div class="row">
+                        <div class="col-xs-6 col-md-4">
+                          <input class="quantity-show" type="number" id='{{row[0]}}' value="0" min="0">
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="row">
+                        <div class="col-xs-12 col-md-8">
+                          <select class="form-control">
+                            {% for row in soumissions %}
+                            <option>{{ row }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="col-xs-6 col-md-4">
+                          <button>Ajouter</button> 
+                        </div>
+                      </div>
                     </td>
                 </tr>
                 {% endfor %}

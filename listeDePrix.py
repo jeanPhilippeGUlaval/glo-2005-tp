@@ -20,6 +20,8 @@ def displayListeDePrixFor():
     table = request.args.get('table')
     title = request.args.get('title')
     headersData = getHeaders(table)
+    soumissions = getSoumissions("")
+    print(soumissions)
     cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
     try:
         print(cmd)
@@ -28,10 +30,10 @@ def displayListeDePrixFor():
         cur=conn.cursor()
         cur.execute(cmd)
         tableData = cur.fetchall()
-        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table )
+        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
     except Exception as e:
         print(e)
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
 
 
 @listeDePrix.route("/listeDePrix/orderBy", methods=['GET'])
@@ -43,6 +45,7 @@ def displayListeDePrixForOrderBy():
     table = request.args.get('table')
     title = request.args.get('title')
     headersData = getHeaders(table)
+    soumissions = getSoumissions("")
     cmd = getCmdWithHeaders(headersData, table, orderBy)
     try:
         print(cmd)
@@ -51,7 +54,7 @@ def displayListeDePrixForOrderBy():
         tableData = cur.fetchall()
     except Exception as e:
         print(e)
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data = tableData, tableId=table)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data = tableData, tableId=table, soumissions=soumissions)
 
 def getHeaders(table):
     try:
@@ -71,4 +74,18 @@ def getCmdWithHeaders(headersData, table):
 def getCmdWithHeaders(headersData, table, orderBy):
     headers = str.join(",",headersData)
     return 'SELECT ' + headers + ' FROM ' + table +' ORDER BY '+ orderBy + ';'
+
+def getSoumissions(userID):
+    try:
+        if userID != "":
+            cmd='SELECT ID FROM soumission_ids WHERE userID = ' + userID +';'
+        else:
+            cmd= 'SELECT ID FROM soumission_ids;'
+        cur=conn.cursor()
+        cur.execute(cmd)
+        soumissions = [row[0] for row in cur.fetchall()]
+        return soumissions
+    except Exception as e:
+        print(e)
+    return
 

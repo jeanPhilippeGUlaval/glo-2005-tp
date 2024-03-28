@@ -14,3 +14,9 @@ width: 50px;
   padding-top: 30px;
   padding-left: 20%;
 }
+
+.container{
+  padding-left: 10%;
+  padding-right: 20px;
+  width: auto;
+}

@@ -21,7 +21,7 @@ def addSoumission():
         return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, headers=headersData, soumissionID=soumissionID, error="Il ne peux pas avoir d'espace dans l'identifiant")
     else:
         try:
-            cmd = 'INSERT INTO soumission_ids VALUES (\''+ newSoumissionID +'\');'
+            cmd = 'INSERT INTO soumission_ids (ID) VALUES (\''+ newSoumissionID +'\');'
             cur.execute(cmd)
             conn.commit()
         except Exception as e:
@@ -40,6 +40,7 @@ def deleteSoumission():
     except Exception as e:
         print(e)
     ListOfSoumissions, tableData, headersData, soumissionID = getData("")
+    # ListOfSoumissions = getSoumissionList()
     return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, headers=headersData, soumissionID=soumissionID)
 
 
@@ -47,10 +48,28 @@ def getData(soumissionID):
     ListOfSoumissions = getSoumissionList()
     headersData = getHeaders("soumission")
     if soumissionID == None or soumissionID == "":
-        cmd = 'SELECT * FROM soumission;'
+        cmd = """SELECT ProductID, TAG, catégorie, prix, sQuantite, sTotal
+FROM (
+    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_porte d INNER JOIN porte p ON d.ProductID = p.ID UNION ALL
+    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_panneaux d INNER JOIN panneaux p ON d.ProductID = p.ID UNION ALL
+    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_ferronnerie d INNER JOIN ferronnerie p ON d.ProductID = p.ID
+) AS products
+WHERE ProductID IN (
+    SELECT ProductID FROM soumission_asso_panneaux UNION ALL
+    SELECT ProductID FROM soumission_asso_porte UNION ALL
+    SELECT ProductID FROM soumission_asso_ferronnerie);"""
         soumissionID = "Toutes les Soumissions"
     else:
-        cmd = 'SELECT * FROM soumission WHERE ID = \''+soumissionID + '\';'
+        cmd = """SELECT ProductID, TAG, catégorie, prix, sQuantite, sTotal
+FROM (
+    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_porte d INNER JOIN porte p ON d.ProductID = p.ID UNION ALL
+    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_panneaux d INNER JOIN panneaux p ON d.ProductID = p.ID UNION ALL
+    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_ferronnerie d INNER JOIN ferronnerie p ON d.ProductID = p.ID
+) AS products
+WHERE ProductID IN (
+    SELECT ProductID FROM soumission_asso_panneaux WHERE sID = '""" + soumissionID + """' UNION ALL
+    SELECT ProductID FROM soumission_asso_porte WHERE sID = '""" + soumissionID + """' UNION ALL
+    SELECT ProductID FROM soumission_asso_ferronnerie WHERE sID = '""" + soumissionID + """');"""
     try:
         print(cmd)
         cur=conn.cursor()

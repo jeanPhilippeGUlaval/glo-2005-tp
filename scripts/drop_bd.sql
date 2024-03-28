@@ -1,16 +1,21 @@
 USE dev;
-ALTER TABLE bundle_asso_color DROP CONSTRAINT bundle_asso_color_ibfk_1;
-ALTER TABLE bundle_asso_color DROP CONSTRAINT bundle_asso_color_ibfk_2;
-ALTER TABLE soumission DROP CONSTRAINT soumission_ibfk_1;
-ALTER TABLE porte DROP CONSTRAINT porte_ibfk_1;
-DROP TABLE users;
-DROP TABLE color;
-DROP TABLE porte;
-DROP TABLE bundle;
-DROP TABLE bundle_asso_color;
-DROP TABLE porte_id_gen;
+DROP TABLE soumission_asso_porte;
+DROP TABLE soumission_asso_panneaux;
+DROP TABLE soumission_asso_ferronnerie;
 DROP TABLE soumission_ids;
-DROP TABLE soumission;
+DROP TABLE users;
+DROP TABLE porte;
+DROP TABLE porte_id_gen;
+DROP TABLE ferronnerie;
+DROP TABLE ferro_id_gen;
+DROP TABLE panneaux;
+DROP TABLE panneaux_id_gen;
+
+DROP TRIGGER CalPrixTotalPanneau;
+DROP TRIGGER porte_insert;
+DROP TRIGGER panneau_insert;
+DROP TRIGGER ferro_insert;
+
 DROP DATABASE dev;
 
 
