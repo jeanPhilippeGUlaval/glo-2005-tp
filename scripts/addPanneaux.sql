@@ -1,0 +1,2 @@
+CREATE TABLE panneaux(ID VARCHAR(24) PRIMARY KEY, Description varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), Prix int);
+INSERT INTO panneaux VALUES ("PANNE-1","PANNEAUX","GRAINS DE BOIS",8,7, "R16","MOTIFS RECTANGULAIRE GROUPE DE 2 ou 4 RAINURES", "ALUMINIUM", 1905);

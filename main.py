@@ -50,7 +50,6 @@ def createAccount():
     email = '"'+request.form.get('inputEmail')+'"'
     password = request.form.get('inputPassword')
     password = '"'+auth.hash_password(password)+'"'
-    print('INSERT INTO users VALUES('+str(id)+', '+email+','+password+');')
     try:
         cmd='INSERT INTO users (email, password) VALUES('+email+','+password+');'
         cur.execute(cmd)
