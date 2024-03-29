@@ -8,6 +8,8 @@ function DisplayListeDePrix(tableName, titleName)
     location.href = "listeDePrix?" + queryString;
 }
 
+
+
 function OrderBy(TableName, Title, OrderBy)
 {
     var dataToSend = {

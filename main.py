@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from database import conn, cur
 from listeDePrix import listeDePrix
 from soumission import soumission
@@ -10,6 +10,7 @@ import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 app.register_blueprint(listeDePrix)
 app.register_blueprint(soumission)
 
@@ -34,10 +35,14 @@ def home():
 def login():
     email = '"'+request.form.get('inputEmail')+'"'
     password = auth.hash_password(request.form.get('inputPassword'))
-    cmd='SELECT password FROM users WHERE email = '+email+';'
+    cmd='SELECT id, password FROM users WHERE email = '+email+';'
     cur.execute(cmd)
     passeVrai = cur.fetchone()
-    if (passeVrai!=None) and (password==passeVrai[0]):
+    print(passeVrai[1])
+    print(password)
+    if (passeVrai!=None) and (password==passeVrai[1]):
+        print("Log")
+        session['id'] = passeVrai[0]
         return render_template('index.html')
     return main()
 

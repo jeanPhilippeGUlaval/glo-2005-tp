@@ -3,6 +3,7 @@ DROP TABLE soumission_asso_porte;
 DROP TABLE soumission_asso_panneaux;
 DROP TABLE soumission_asso_ferronnerie;
 DROP TABLE soumission_ids;
+-- DROP TABLE log_table;
 DROP TABLE users;
 DROP TABLE porte;
 DROP TABLE porte_id_gen;

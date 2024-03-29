@@ -2,6 +2,8 @@ CREATE DATABASE dev;
 USE dev;
 CREATE TABLE users(id int PRIMARY KEY AUTO_INCREMENT, email varchar(256), password varchar(256));
 
+-- CREATE TABLE log_table(log_line int PRIMARY KEY AUTO_INCREMENT, userID int, userEmail email varchar(256),  logTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, tokenExpires TIMESTAMP, FOREIGN KEY(userID) REFERENCES users(id), FOREIGN KEY(userEmail) REFERENCES users(email));
+
 CREATE TABLE porte_id_gen(numerical_id INT AUTO_INCREMENT PRIMARY KEY);
 CREATE TABLE porte (ID VARCHAR(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Motif int, Ferronerie varchar(24), Alliage varchar(24), Prix int);
 
@@ -41,6 +43,24 @@ CREATE TRIGGER CalPrixTotalPanneau
     FOR EACH ROW
     BEGIN
         SET NEW.sTotal = (SELECT SUM(p.prix * NEW.sQuantite) FROM panneaux p WHERE p.ID = NEW.ProductID);
+    END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER CalPrixTotalPorte
+    BEFORE INSERT ON soumission_asso_porte
+    FOR EACH ROW
+    BEGIN
+        SET NEW.sTotal = (SELECT SUM(p.prix * NEW.sQuantite) FROM porte p WHERE p.ID = NEW.ProductID);
+    END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER CalPrixTotalFerronnerie
+    BEFORE INSERT ON soumission_asso_ferronnerie
+    FOR EACH ROW
+    BEGIN
+        SET NEW.sTotal = (SELECT SUM(p.prix * NEW.sQuantite) FROM ferronnerie f WHERE p.ID = NEW.ProductID);
     END //
 DELIMITER ;
 

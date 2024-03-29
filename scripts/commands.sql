@@ -45,3 +45,8 @@ DELETE FROM soumission_asso_panneaux WHERE sID = "testLocal";
 -- INSERT INTO soumission VALUES ("Soumission_1", "PORTE-1","CABANON", 800);
 
 -- DELETE FROM soumission_ids WHERE ID = 'Soumission_1';
+
+SELECT SUM(t.subTotal) FROM 
+(SELECT SUM(sTotal) AS subTotal FROM soumission_asso_porte WHERE sID = "test" UNION ALL 
+SELECT SUM(sTotal) AS subTotal FROM soumission_asso_panneaux WHERE sID = "test"  UNION ALL 
+SELECT SUM(sTotal) AS subTotal FROM soumission_asso_ferronnerie WHERE sID = "test") t;

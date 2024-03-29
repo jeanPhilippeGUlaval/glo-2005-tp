@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Blueprint
+from flask import Flask, render_template, request, Blueprint, session
 from database import conn, cur
 import pymysql
 import logging
@@ -14,17 +14,17 @@ listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 #     return displayListeDePrixFor()
 
 @listeDePrix.route("/listeDePrix", methods=['GET'])
-def displayListeDePrixFor():
+def displayListeDePrixFor(table ="", title=""):
     table : str
     title : str
-    table = request.args.get('table')
-    title = request.args.get('title')
+    if table == None or table == "":
+        table = request.args.get('table')
+    if title == None or title == "":
+        title = request.args.get('title')
     headersData = getHeaders(table)
-    soumissions = getSoumissions("")
-    print(soumissions)
+    soumissions = getSoumissions(session["id"])
     cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
     try:
-        print(cmd)
         if cmd == "":
             cmd = "SELECT * FROM porte;"
         cur=conn.cursor()
@@ -45,16 +45,53 @@ def displayListeDePrixForOrderBy():
     table = request.args.get('table')
     title = request.args.get('title')
     headersData = getHeaders(table)
-    soumissions = getSoumissions("")
+    soumissions = getSoumissions(session["id"])
     cmd = getCmdWithHeaders(headersData, table, orderBy)
     try:
-        print(cmd)
         cur=conn.cursor()
         cur.execute(cmd)
         tableData = cur.fetchall()
     except Exception as e:
         print(e)
     return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data = tableData, tableId=table, soumissions=soumissions)
+
+@listeDePrix.route("/product/addToSoumission", methods=['POST'])
+def addItemToSoumission():
+    qty = request.form.get('qty', type=int)
+    soumissionID = request.form.get('soumissionID')
+    productID = request.form.get('productID')
+    table = request.form.get('table')
+    title = request.form.get('title')
+    try:
+        tableToAdd : str
+        tableToAdd = getTableToAddItem(productID)
+        if tableToAdd == "":
+            print("ERROR")
+            return displayListeDePrixFor(table, title)
+        print(tableToAdd)
+        print(soumissionID)
+        print(productID)
+        print(qty)
+        cmd = 'INSERT INTO '+ str(tableToAdd) +' (sID, ProductID, sQuantite) VALUES (\''+soumissionID+'\', \''+ productID +'\', '+ str(qty) +');'
+        print(cmd)
+        cur.execute(cmd)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        
+    return displayListeDePrixFor(table, title)
+
+
+def getTableToAddItem(itemID):
+    itemType = str.split(itemID, "-")[0]
+    if itemType == "PORTE":
+        return 'soumission_asso_porte'
+    elif itemType == "FERRO":
+        return 'soumission_asso_ferronnerie'
+    elif itemType == "PANNE":
+        return 'soumission_asso_panneaux'
+    else:
+        return ""
 
 def getHeaders(table):
     try:
@@ -77,10 +114,7 @@ def getCmdWithHeaders(headersData, table, orderBy):
 
 def getSoumissions(userID):
     try:
-        if userID != "":
-            cmd='SELECT ID FROM soumission_ids WHERE userID = ' + userID +';'
-        else:
-            cmd= 'SELECT ID FROM soumission_ids;'
+        cmd= 'SELECT ID FROM soumission_ids WHERE userID = '+str(userID)+';'
         cur=conn.cursor()
         cur.execute(cmd)
         soumissions = [row[0] for row in cur.fetchall()]
