@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des prix</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Liste des prix</h1>
+    <form action="/" method="get">
+        <label for="search">Rechercher :</label>
+        <input type="text" id="search" name="search">
+        <button type="submit">Go</button>
+    </form>
+    <form action="/ajouter_produit" method="post">
+        <label for="type_produit">Type de produit :</label>
+        <input type="text" id="type_produit" name="type_produit">
+        <button type="submit">Ajouter</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Type de produit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produit in produits %}
+            <tr>
+                <td>{{ produit.type_produit }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
