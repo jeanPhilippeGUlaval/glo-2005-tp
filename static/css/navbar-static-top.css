@@ -1,0 +1,32 @@
+body {
+  min-height: 2000px;
+}
+
+.navbar-static-top {
+  margin-bottom: 19px;
+}
+
+.quantity-show {
+width: 50px;
+}
+
+.custom_button_padding {
+  padding-top: 30px;
+  padding-left: 20%;
+}
+
+.container{
+  padding-left: 10%;
+  padding-right: 20px;
+  width: auto;
+}
+
+.total{
+  float: right;
+  display:inline-flex
+  
+}
+
+.total .item {
+  margin-right: 10%;
+}

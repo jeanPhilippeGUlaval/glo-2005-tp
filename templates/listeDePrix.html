@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Liste de Prix</title>
+
+    <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <link href="../static/css/navbar-static-top.css" rel="stylesheet">
+    <script src="../static/assets/js/ie-emulation-modes-warning.js"></script>
+
+  </head>
+  <body>
+    <!-- Top NavBar -->
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/home">Entreprise X</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Liste de produits</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/soumission">Soumission</a></li>
+            <li><a href="">Profile</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Sidebar -->
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <li><a href="/listeDePrix?title=Porte%20de%20Garage&table=porte">Porte de Garage</a></li>
+        <li><a href="/listeDePrix?title=Panneaux%20de%20Porte&table=panneaux">Panneaux de porte</a></li>
+        <li><a href="/listeDePrix?title=Ferronnerie&table=ferronnerie">Ferronerie</a></li>
+      </ul>
+    </div>
+    <!-- Container -->
+    <div class="container">
+      <form class="navbar-form navbar-right" action="/listeDePrix/search">
+        <input type="text" class="form-control" name="search" placeholder="Search...">
+        <input type="hidden" name="product" value="{{tableId}}" />
+        <input type="hidden" name="title" value="{{lsDePrix}}" />
+      </form>
+      <h2 class="sub-header">{{lsDePrix}}</h2>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  {% for row in headers %}
+                    <th onclick="OrderBy('{{tableId}}','{{lsDePrix}}','{{row}}')" onfocus="">{{ row }}</th>
+                  {% endfor %}
+                  <th>Quantité</th>
+                  <th>Soumission</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in data %}
+                <tr>
+                    {% for cell in row %}
+                      <td>{{ cell }}</td>
+                    {% endfor %}
+                    <form action="/product/addToSoumission" method="post">
+                      <td>
+                        <div class="row">
+                          <div class="col-xs-6 col-md-4">
+                            <input class="quantity-show" type="number" id='qty' name="qty" value="0" min="0">
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="row">
+                          <div class="col-xs-12 col-md-8">
+                            <select class="form-control" id="soumissionID" name="soumissionID">
+                              {% for soum in soumissions %}
+                              <option id="soumissionIDO" >{{ soum }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-xs-6 col-md-4">
+                            <input type="hidden" name="table" value="{{tableId}}" />
+                            <input type="hidden" name="title" value="{{lsDePrix}}" />
+                            <button type="submit" id="productID" name="productID" value="{{row[0]}}" >Ajouter</button> 
+                          </div>
+                        </div>
+                      </td>
+                    </form>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../static/assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../static/dist/js/bootstrap.min.js"></script>
+    <script src="../static/js/listeDePrix.js"></script>
+    <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
