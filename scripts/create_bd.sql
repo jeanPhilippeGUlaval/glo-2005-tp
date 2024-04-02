@@ -11,7 +11,7 @@ CREATE TABLE panneaux_id_gen(numerical_id INT AUTO_INCREMENT PRIMARY KEY);
 CREATE TABLE panneaux(ID VARCHAR(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), Prix int);
 
 CREATE TABLE ferro_id_gen(numerical_id INT AUTO_INCREMENT PRIMARY KEY);
-CREATE TABLE ferronnerie(ID varchar(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), prix int);
+CREATE TABLE ferronnerie(ID varchar(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), Prix int);
 
 CREATE TABLE soumission_ids (ID VARCHAR(24) PRIMARY KEY, userID int, dateSoumission TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(userID) REFERENCES users(id) ON DELETE CASCADE);
 

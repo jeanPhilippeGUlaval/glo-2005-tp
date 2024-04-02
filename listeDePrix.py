@@ -35,6 +35,23 @@ def displayListeDePrixFor(table ="", title=""):
         print(e)
     return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
 
+@listeDePrix.route("/listeDePrix/search", methods=['GET'])
+def index():
+    search_term = request.args.get('search', '')
+    product = request.args.get('product', '')
+    title = request.args.get('title')
+    headersData = getHeaders(product)
+    soumissions = getSoumissions(session["id"])
+    if search_term:
+        cmd = getCmdWithHeadersWithSearch(headersData,product, search_term)
+    else:
+        cmd = getCmdWithHeaders(headersData, product, "Catégorie, Hauteur, Largeur")
+    cur=conn.cursor()
+    cur.execute(cmd)
+    tableData = cur.fetchall()
+    cur.close()
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=tableData, soumissions=soumissions)
+
 
 @listeDePrix.route("/listeDePrix/orderBy", methods=['GET'])
 def displayListeDePrixForOrderBy():
@@ -111,6 +128,13 @@ def getCmdWithHeaders(headersData, table):
 def getCmdWithHeaders(headersData, table, orderBy):
     headers = str.join(",",headersData)
     return 'SELECT ' + headers + ' FROM ' + table +' ORDER BY '+ orderBy + ';'
+
+def getCmdWithHeadersWithSearch(headersData, table, search_term, orderBy = ""):
+    headers = str.join(",",headersData)
+    if orderBy == "":
+        return 'SELECT '+ headers + ' FROM '+ table + ' WHERE Catégorie LIKE \'%' + search_term + '%\''
+    else:
+        return 'SELECT ' + headers + ' FROM ' + table +' WHERE Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
 
 def getSoumissions(userID):
     try:

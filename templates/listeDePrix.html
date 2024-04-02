@@ -49,8 +49,10 @@
     </div>
     <!-- Container -->
     <div class="container">
-      <form class="navbar-form navbar-right">
-        <input type="text" class="form-control" placeholder="Search...">
+      <form class="navbar-form navbar-right" action="/listeDePrix/search">
+        <input type="text" class="form-control" name="search" placeholder="Search...">
+        <input type="hidden" name="product" value="{{tableId}}" />
+        <input type="hidden" name="title" value="{{lsDePrix}}" />
       </form>
       <h2 class="sub-header">{{lsDePrix}}</h2>
           <div class="table-responsive">
