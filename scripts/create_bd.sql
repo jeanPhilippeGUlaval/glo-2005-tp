@@ -4,14 +4,10 @@ CREATE TABLE users(id int PRIMARY KEY AUTO_INCREMENT, email varchar(256), passwo
 
 -- CREATE TABLE log_table(log_line int PRIMARY KEY AUTO_INCREMENT, userID int, userEmail email varchar(256),  logTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, tokenExpires TIMESTAMP, FOREIGN KEY(userID) REFERENCES users(id), FOREIGN KEY(userEmail) REFERENCES users(email));
 
-CREATE TABLE porte_id_gen(numerical_id INT AUTO_INCREMENT PRIMARY KEY);
-CREATE TABLE porte (ID VARCHAR(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Motif int, Ferronerie varchar(24), Alliage varchar(24), Prix int);
-
-CREATE TABLE panneaux_id_gen(numerical_id INT AUTO_INCREMENT PRIMARY KEY);
-CREATE TABLE panneaux(ID VARCHAR(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), Prix int);
-
-CREATE TABLE ferro_id_gen(numerical_id INT AUTO_INCREMENT PRIMARY KEY);
-CREATE TABLE ferronnerie(ID varchar(24) PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), Prix int);
+CREATE TABLE produits(ID_Produit INT AUTO_INCREMENT PRIMARY KEY);
+CREATE TABLE porte (ID int PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Motif int, Ferronerie varchar(24), Alliage varchar(24), Prix int, FOREIGN KEY (ID) REFERENCES produits(ID_Produit) ON DELETE CASCADE);
+CREATE TABLE panneaux(ID int PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), Prix int, FOREIGN KEY (ID) REFERENCES produits(ID_Produit) ON DELETE CASCADE);
+CREATE TABLE ferronnerie(ID int PRIMARY KEY, TAG varchar(70), Catégorie varchar(30), Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), Prix int, FOREIGN KEY (ID) REFERENCES produits(ID_Produit)ON DELETE CASCADE);
 
 CREATE TABLE soumission_ids (ID VARCHAR(24) PRIMARY KEY, userID int, dateSoumission TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(userID) REFERENCES users(id) ON DELETE CASCADE);
 
@@ -82,8 +78,8 @@ CREATE TRIGGER porte_insert
 BEFORE INSERT ON porte 
 FOR EACH ROW
 BEGIN
-  INSERT INTO porte_id_gen VALUES (NULL);
-  SET NEW.ID = CONCAT('PORTE-',(LAST_INSERT_ID()));
+  INSERT INTO produits VALUES (NULL);
+  SET NEW.ID = LAST_INSERT_ID();
   SET NEW.TAG = 'PORTE DE GARAGE';
 END//
 DELIMITER ;
@@ -93,8 +89,8 @@ CREATE TRIGGER panneau_insert
 BEFORE INSERT ON panneaux 
 FOR EACH ROW
 BEGIN
-  INSERT INTO panneaux_id_gen VALUES (NULL);
-  SET NEW.ID = CONCAT('PANNE-',(LAST_INSERT_ID()));
+  INSERT INTO produits VALUES (NULL);
+  SET NEW.ID = LAST_INSERT_ID();
   SET NEW.TAG = 'PANNEAUX';
 END//
 DELIMITER ;
@@ -104,8 +100,8 @@ CREATE TRIGGER ferro_insert
 BEFORE INSERT ON ferronnerie 
 FOR EACH ROW
 BEGIN
-  INSERT INTO ferro_id_gen VALUES (NULL);
-  SET NEW.ID = CONCAT('FERRO-',(LAST_INSERT_ID()));
+  INSERT INTO produits VALUES (NULL);
+  SET NEW.ID = LAST_INSERT_ID();
   SET NEW.TAG = 'FERRONNERIE';
 END//
 DELIMITER ;
