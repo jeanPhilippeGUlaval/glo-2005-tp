@@ -1,32 +1,22 @@
 from flask import Flask, render_template, request, Blueprint, session
 from database import conn, cur
-import pymysql
-import logging
 import pymysql.cursors
-import os
-from dotenv import load_dotenv
+from authentication import signin
 
 
 listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 
-# @listeDePrix.route("/listeDePrix")
-# def displayListeDePrix():
-#     return displayListeDePrixFor()
 
-@listeDePrix.route("/listeDePrix", methods=['GET'])
-def displayListeDePrixFor(table ="", title=""):
-    table : str
-    title : str
-    if table == None or table == "":
-        table = request.args.get('table')
-    if title == None or title == "":
-        title = request.args.get('title')
+@listeDePrix.route("/listeDePrix/porte", methods=['GET'])
+def displayListeDePrixFor():
+    if session['id'] == None:
+        return signin()
+    table = "porte"
+    title = "Porte de Garage"
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
     cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
     try:
-        if cmd == "":
-            cmd = "SELECT * FROM porte;"
         cur=conn.cursor()
         cur.execute(cmd)
         tableData = cur.fetchall()
@@ -35,8 +25,50 @@ def displayListeDePrixFor(table ="", title=""):
         print(e)
     return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
 
+
+@listeDePrix.route("/listeDePrix/panneaux", methods=['GET'])
+def displayListeDePrixFor():
+    if session['id'] == None:
+        return signin()
+    table = "panneaux"
+    title = "Panneaux"
+    headersData = getHeaders(table)
+    soumissions = getSoumissions(session["id"])
+    cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
+    try:
+        cur=conn.cursor()
+        cur.execute(cmd)
+        tableData = cur.fetchall()
+        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
+    except Exception as e:
+        print(e)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
+
+
+@listeDePrix.route("/listeDePrix/ferronnerie", methods=['GET'])
+def displayListeDePrixFor():
+    if session['id'] == None:
+        return signin()
+    table = "ferronnerie"
+    title = "Ferronnerie"
+    headersData = getHeaders(table)
+    soumissions = getSoumissions(session["id"])
+    cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
+    try:
+        cur=conn.cursor()
+        cur.execute(cmd)
+        tableData = cur.fetchall()
+        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
+    except Exception as e:
+        print(e)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
+
+    
+
 @listeDePrix.route("/listeDePrix/search", methods=['GET'])
 def index():
+    if session['id'] == None:
+        return signin()
     search_term = request.args.get('search', '')
     product = request.args.get('product', '')
     title = request.args.get('title')
@@ -55,12 +87,11 @@ def index():
 
 @listeDePrix.route("/listeDePrix/orderBy", methods=['GET'])
 def displayListeDePrixForOrderBy():
-    orderBy : str
-    orderBy = request.args.get('orderBy')
-    table : str
-    title : str
-    table = request.args.get('table')
-    title = request.args.get('title')
+    if session['id'] == None:
+        return signin()
+    orderBy = request.form.get('orderBy')
+    table = request.form.get('table')
+    title = request.form.get('title')
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
     cmd = getCmdWithHeaders(headersData, table, orderBy)
@@ -74,9 +105,11 @@ def displayListeDePrixForOrderBy():
 
 @listeDePrix.route("/product/addToSoumission", methods=['POST'])
 def addItemToSoumission():
+    if session['id'] == None:
+        return signin()
     qty = request.form.get('qty', type=int)
     soumissionID = request.form.get('soumissionID')
-    productID = request.form.get('productID')
+    productID = request.form.get('productID', type=int)
     table = request.form.get('table')
     title = request.form.get('title')
     try:
@@ -89,7 +122,7 @@ def addItemToSoumission():
         print(soumissionID)
         print(productID)
         print(qty)
-        cmd = 'INSERT INTO '+ str(tableToAdd) +' (sID, ProductID, sQuantite) VALUES (\''+soumissionID+'\', \''+ productID +'\', '+ str(qty) +');'
+        cmd = 'INSERT INTO '+ str(tableToAdd) +' (sID, ProductID, sQuantite) VALUES (\''+soumissionID+'\', '+ str(productID) +', '+ str(qty) +');'
         print(cmd)
         cur.execute(cmd)
         conn.commit()
@@ -100,19 +133,24 @@ def addItemToSoumission():
 
 
 def getTableToAddItem(itemID):
-    itemType = str.split(itemID, "-")[0]
-    if itemType == "PORTE":
-        return 'soumission_asso_porte'
-    elif itemType == "FERRO":
-        return 'soumission_asso_ferronnerie'
-    elif itemType == "PANNE":
-        return 'soumission_asso_panneaux'
-    else:
-        return ""
+   cmd = 'SELECT produit FROM produits WHERE ID_Produit = '+str(itemID)+';'
+   cur.execute(cmd)
+   conn.commit()
+   table = cur.fetchone()[0]
+   
+   match table:
+       case 'porte':
+           return 'soumission_asso_porte'
+       case 'panneaux':
+           return 'soumission_asso_panneaux'
+       case 'ferronnerie':
+           return 'soumission_asso_ferronnerie'
+
+   return table
 
 def getHeaders(table):
     try:
-        cmd='SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = \''+table+'\' AND (COLUMN_KEY = \'\' OR COLUMN_KEY = \'PRI\');'
+        cmd='SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = \''+table+'\' AND (COLUMN_KEY = \'\' OR COLUMN_KEY = \'PRI\') ORDER BY ORDINAL_POSITION;'
         cur=conn.cursor()
         cur.execute(cmd)
         headersData = [row[0] for row in cur.fetchall()]

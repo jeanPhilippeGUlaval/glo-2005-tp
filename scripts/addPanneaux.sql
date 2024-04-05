@@ -1,3 +1,4 @@
+use dev;
 INSERT INTO panneaux (Catégorie, Largeur, Hauteur, Isolation, Modele, Alliage, prix) VALUES ("GRAINS DE BOIS",8,7,"R16","MOTIFS RECTANGULAIRE GROUPE DE 2 ou 4 RAINURES","ALUMINIUM",1905);
 INSERT INTO panneaux (Catégorie, Largeur, Hauteur, Isolation, Modele, Alliage, prix) VALUES ("GRAINS DE BOIS",9,7,"R16","MOTIFS RECTANGULAIRE GROUPE DE 2 ou 4 RAINURES","ALUMINIUM",2142);
 INSERT INTO panneaux (Catégorie, Largeur, Hauteur, Isolation, Modele, Alliage, prix) VALUES ("GRAINS DE BOIS",10,7,"R16","MOTIFS RECTANGULAIRE GROUPE DE 2 ou 4 RAINURES","ALUMINIUM",2379);

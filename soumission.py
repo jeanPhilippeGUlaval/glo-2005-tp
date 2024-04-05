@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, Blueprint
 from database import *
 from listeDePrix import getHeaders
+from authentication import signin
 
 
 soumission = Blueprint('soumission', __name__, template_folder='templates')
 
 @soumission.route("/soumission", methods=["GET"])
 def displaySoumissionID(soumissionID =""):
+    if session['id'] == None:
+        return signin()
     if soumissionID == "":
         soumissionID = request.args.get('id')
     if soumissionID == "" or soumissionID == None:
@@ -20,6 +23,8 @@ def displaySoumissionID(soumissionID =""):
 
 @soumission.route("/soumission/addSoumission", methods=['POST'])
 def addSoumission():
+    if session['id'] == None:
+        return signin()
     newSoumissionID = request.form.get('inputSoumissionID')
     if newSoumissionID.find(" ") != -1:
         ListOfSoumissions, tableData, headersData, soumissionID = getData("")
@@ -37,6 +42,8 @@ def addSoumission():
 
 @soumission.route("/soumission/supprimerSoumission", methods=['GET'])
 def deleteSoumission():
+    if session['id'] == None:
+        return signin()
     SoumissionID = request.args.get('id')
     try:
         cmd = 'DELETE FROM soumission_ids WHERE ID = \''+ SoumissionID +'\';'

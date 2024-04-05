@@ -24,6 +24,11 @@
   <body>
 
     <div class="container">
+      {% if error != '' %}
+      <div class="alert alert-danger" role="alert">
+        <p>{{ error }}</p>
+      </div>
+      {% endif %}
 
       <form class="form-signin" action="login" method="post">
         <h2 class="form-signin-heading">Se Connecter</h2>
@@ -37,7 +42,7 @@
         <button class="btn btn-lg btn-info btn-block" type="submit" onclick="GotoSignUp()">Créer un compte</button>
       </form>
 
-    </div> <!-- /container -->
+    </div> 
 
 
     <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>

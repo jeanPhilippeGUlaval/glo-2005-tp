@@ -34,7 +34,7 @@
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li><a href="/soumission">Soumission</a></li>
-            <li><a href="">Profile</a></li>
+            <li><a href="/logout">Déconnexion</a></li>
           </ul>
         </div>
       </div>
@@ -42,9 +42,9 @@
     <!-- Sidebar -->
     <div class="col-sm-3 col-md-2 sidebar">
       <ul class="nav nav-sidebar">
-        <li><a href="/listeDePrix?title=Porte%20de%20Garage&table=porte">Porte de Garage</a></li>
-        <li><a href="/listeDePrix?title=Panneaux%20de%20Porte&table=panneaux">Panneaux de porte</a></li>
-        <li><a href="/listeDePrix?title=Ferronnerie&table=ferronnerie">Ferronerie</a></li>
+        <li><a onclick="GetPage('Porte de Garage', 'porte')">Porte de Garage</a></li>
+        <li><a onclick="GetPage('Porte de Garage', 'panneaux')" >Panneaux de porte</a></li>
+        <li><a onclick="GetPage('Porte de Garage', 'ferronnerie')">Ferronerie</a></li>
       </ul>
     </div>
     <!-- Container -->
@@ -60,7 +60,7 @@
               <thead>
                 <tr>
                   {% for row in headers %}
-                    <th onclick="OrderBy('{{tableId}}','{{lsDePrix}}','{{row}}')" onfocus="">{{ row }}</th>
+                    <th onclick="OrderBy('{{tableId}}','{{lsDePrix}}','{{row}}')">{{ row }}</th>
                   {% endfor %}
                   <th>Quantité</th>
                   <th>Soumission</th>
