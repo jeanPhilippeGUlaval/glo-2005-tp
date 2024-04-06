@@ -7,12 +7,7 @@ from authentication import signin
 listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 
 
-@listeDePrix.route("/listeDePrix/porte", methods=['GET'])
-def displayListeDePrixFor():
-    if session['id'] == None:
-        return signin()
-    table = "porte"
-    title = "Porte de Garage"
+def display(table, title):
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
     cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
@@ -25,45 +20,24 @@ def displayListeDePrixFor():
         print(e)
     return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
 
+@listeDePrix.route("/listeDePrix/porte", methods=['GET'])
+def displayListeDePrixForPorte():
+    if session['id'] == None:
+        return signin()
+    return display("porte", "Porte de Garage")
 
 @listeDePrix.route("/listeDePrix/panneaux", methods=['GET'])
-def displayListeDePrixFor():
+def displayListeDePrixForPanneaux():
     if session['id'] == None:
         return signin()
-    table = "panneaux"
-    title = "Panneaux"
-    headersData = getHeaders(table)
-    soumissions = getSoumissions(session["id"])
-    cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
-    try:
-        cur=conn.cursor()
-        cur.execute(cmd)
-        tableData = cur.fetchall()
-        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
-    except Exception as e:
-        print(e)
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
+    return display("panneaux", "Panneaux")
 
 
 @listeDePrix.route("/listeDePrix/ferronnerie", methods=['GET'])
-def displayListeDePrixFor():
+def displayListeDePrixForFerronnerie():
     if session['id'] == None:
         return signin()
-    table = "ferronnerie"
-    title = "Ferronnerie"
-    headersData = getHeaders(table)
-    soumissions = getSoumissions(session["id"])
-    cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
-    try:
-        cur=conn.cursor()
-        cur.execute(cmd)
-        tableData = cur.fetchall()
-        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
-    except Exception as e:
-        print(e)
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
-
-    
+    return display("ferronnerie", "Ferronnerie")    
 
 @listeDePrix.route("/listeDePrix/search", methods=['GET'])
 def index():
@@ -82,6 +56,8 @@ def index():
     cur.execute(cmd)
     tableData = cur.fetchall()
     cur.close()
+    if tableData == None:
+        return display("porte", "Porte de Garage")
     return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=tableData, soumissions=soumissions)
 
 
@@ -107,29 +83,24 @@ def displayListeDePrixForOrderBy():
 def addItemToSoumission():
     if session['id'] == None:
         return signin()
-    qty = request.form.get('qty', type=int)
-    soumissionID = request.form.get('soumissionID')
     productID = request.form.get('productID', type=int)
-    table = request.form.get('table')
-    title = request.form.get('title')
+    getQty = ''+str(productID) +'-qty'
+    print(getQty)
+    qty = request.form.get(getQty)
+    print(qty)
+    soumissionID = request.form.get('soumissionID')
     try:
-        tableToAdd : str
         tableToAdd = getTableToAddItem(productID)
-        if tableToAdd == "":
-            print("ERROR")
-            return displayListeDePrixFor(table, title)
-        print(tableToAdd)
-        print(soumissionID)
-        print(productID)
-        print(qty)
-        cmd = 'INSERT INTO '+ str(tableToAdd) +' (sID, ProductID, sQuantite) VALUES (\''+soumissionID+'\', '+ str(productID) +', '+ str(qty) +');'
+        if len(tableToAdd) == 0:
+            return "Error"
+        cmd = 'CALL AjouterSoumission(\''+tableToAdd[0]+'\', '+str(productID)+', '+str(qty)+', \''+soumissionID+'\',\''+tableToAdd[1]+'\');'
+        # cmd = 'INSERT INTO '+ str(tableToAdd) +' (sID, ProductID, sQuantite) VALUES (\''+soumissionID+'\', '+ str(productID) +', '+ str(qty) +');'
         print(cmd)
         cur.execute(cmd)
         conn.commit()
     except Exception as e:
         print(e)
-        
-    return displayListeDePrixFor(table, title)
+    return "Ok"
 
 
 def getTableToAddItem(itemID):
@@ -140,11 +111,11 @@ def getTableToAddItem(itemID):
    
    match table:
        case 'porte':
-           return 'soumission_asso_porte'
+           return ['soumission_asso_porte', 'porte']
        case 'panneaux':
-           return 'soumission_asso_panneaux'
+           return ['soumission_asso_panneaux', 'panneaux']
        case 'ferronnerie':
-           return 'soumission_asso_ferronnerie'
+           return ['soumission_asso_ferronnerie', 'ferronnerie']
 
    return table
 

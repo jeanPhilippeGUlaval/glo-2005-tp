@@ -38,18 +38,22 @@ async function GetPage(Title, TableName){
       }
 }
 
-function OrderBy(TableName, Title, OrderBy) {
+async function AddToSoumission(productID) {
+    let con = "#addForm".concat("-",productID)
+    const form = document.querySelector(con);
     // Construct a FormData instance
-    const formData = new FormData();
-  
+    const formData = new FormData(form);
+    // console.log(formData.get('soumissionID'))
+    // console.log(formData.get('productID'))
+    // if (formData.get('qty') <= 0){
+    //     return
+    // }
     // Add a text field
-    formData.append("table", TableName);
-    formData.append("title", Title);
-    formData.append("orderBy", OrderBy);
+    // formData.append("soumissionID", soumissionID);
   
     try {
-      const response = fetch("/listeDePrix/orderBy", {
-        method: "GET",
+      const response = await fetch("/product/addToSoumission", {
+        method: "POST",
         body: formData,
       });
       console.log(response.json());

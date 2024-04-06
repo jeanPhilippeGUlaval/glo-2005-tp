@@ -42,9 +42,9 @@
     <!-- Sidebar -->
     <div class="col-sm-3 col-md-2 sidebar">
       <ul class="nav nav-sidebar">
-        <li><a onclick="GetPage('Porte de Garage', 'porte')">Porte de Garage</a></li>
-        <li><a onclick="GetPage('Porte de Garage', 'panneaux')" >Panneaux de porte</a></li>
-        <li><a onclick="GetPage('Porte de Garage', 'ferronnerie')">Ferronerie</a></li>
+        <li><a href="/listeDePrix/porte">Porte de Garage</a></li>
+        <li><a href="/listeDePrix/panneaux" >Panneaux de porte</a></li>
+        <li><a href="/listeDePrix/ferronnerie">Ferronerie</a></li>
       </ul>
     </div>
     <!-- Container -->
@@ -72,13 +72,9 @@
                     {% for cell in row %}
                       <td>{{ cell }}</td>
                     {% endfor %}
-                    <form action="/product/addToSoumission" method="post">
+                    <form id="addForm-{{row[0]}}">
                       <td>
-                        <div class="row">
-                          <div class="col-xs-6 col-md-4">
-                            <input class="quantity-show" type="number" id='qty' name="qty" value="0" min="0">
-                          </div>
-                        </div>
+                        <input class="quantity-show" type="number" name="{{row[0]}}-qty" placeholder="0" min="0">
                       </td>
                       <td>
                         <div class="row">
@@ -90,9 +86,8 @@
                             </select>
                           </div>
                           <div class="col-xs-6 col-md-4">
-                            <input type="hidden" name="table" value="{{tableId}}" />
-                            <input type="hidden" name="title" value="{{lsDePrix}}" />
-                            <button type="submit" id="productID" name="productID" value="{{row[0]}}" >Ajouter</button> 
+                            <input type="hidden" name="productID" value="{{row[0]}}">
+                            <button type="submit" onclick="AddToSoumission('{{row[0]}}')">Ajouter</button> 
                           </div>
                         </div>
                       </td>

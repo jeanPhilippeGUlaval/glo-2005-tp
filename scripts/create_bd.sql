@@ -58,6 +58,53 @@ CREATE TRIGGER CalPrixTotalFerronnerie
     END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE AjouterSoumission(IN tableid varchar(50), IN produitID int, IN qty int,IN soumissionID varchar(24), IN productTable varchar(24))
+BEGIN
+    DECLARE total DECIMAL;    
+    SET @sql := CONCAT("SELECT ProductID FROM ", tableid, " WHERE ProductID = ", produitID, " AND sID = '",soumissionID,"';");
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    
+    IF FOUND_ROWS() > 0 THEN
+        SET @sql := CONCAT("SELECT sQuantite into @tempQty FROM ", tableid, " WHERE ProductID = ", produitID, " AND sID = '",soumissionID,"';");
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+        
+        SET @NewQty = qty + @tempQty;
+        SET @sql := CONCAT("SELECT prix into @tempPrix FROM ", productTable, " WHERE ID = ", produitID,";");
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+        
+        SET total = @NewQty * @tempPrix;
+        
+        SET @sql := CONCAT("UPDATE ", tableid, " SET sQuantite = ",@NewQty,", sTotal = ",total," WHERE ProductID = ",produitID, " AND sID ='",soumissionID,"';");
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    ELSE
+        SET @sql := CONCAT("SELECT prix into @tempPrix FROM ", productTable, " WHERE ID = ", produitID,";");
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+        
+        SET total = qty * @tempPrix;
+        
+        SET @sql := CONCAT("INSERT INTO ", tableid, " (sID, ProductID, sQuantite, sTotal) VALUES ('",soumissionID,"',",produitID,",",qty,",",total,");");
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+END //
+DELIMITER ;
+
+SET @sql = CONCAT('SELECT prix FROM ', productTable, ' WHERE ID = ', produitID);
+SET @sql = CONCAT('INSERT INTO 'tableid' (sID, ProductID, sQuantite, sTotal) VALUES (?,?,?);', soumissionID, produitID, qty, total);
+
+
 -- DELIMITER //
 -- CREATE TRIGGER NbCommandes
 --     AFTER INSERT ON soumission
