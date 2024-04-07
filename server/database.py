@@ -4,6 +4,11 @@ import pymysql.cursors
 import os
 from dotenv import load_dotenv
 
+# Cette constante permet d'ajouter une couche de sécurité car elle empêche un utilisateur d'accèder
+# à une table qui n'est pas dans les tables de produits grâce à de l'injection
+TABLE_PRODUIT = ["porte","panneaux","ferronnerie"]
+
+
 load_dotenv(override=True)
 # On vient gérer la connexion à la base de donnée
 conn = pymysql.connect(
@@ -19,5 +24,3 @@ def get_session_user():
         return None
     # fetch the user from database somehow
     return session['id']
-
-TABLE_PRODUIT = ["porte","panneaux","ferronnerie"]

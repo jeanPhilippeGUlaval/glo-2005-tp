@@ -41,6 +41,7 @@ def createAccount():
     password : str
     email = '"'+request.form.get('inputEmail')+'"'
     password = request.form.get('inputPassword')
+    # Ceci est le sel qui est ajouté au mot de passe pour augmenter l'encodage.
     salt = uuid.uuid4().hex
     password = '"'+ hash_password(password, salt) +'"'
     try:

@@ -6,6 +6,7 @@ from authentication import signin
 
 soumission = Blueprint('soumission', __name__, template_folder='templates')
 
+# Fonction qui affiche la page principal des soumissions d'un utilisateur.
 @soumission.route("/soumission", methods=["GET"])
 def displaySoumissionID(soumissionID =""):
     if session['id'] == None:
@@ -21,6 +22,10 @@ def displaySoumissionID(soumissionID =""):
         ListOfSoumissions, tableData, headersData, soumissionID = getData(soumissionID)
     return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, headers=headersData, soumissionID=soumissionID, total=getTotal(soumissionID))
 
+# Fonction qui vient créer une nouvelle soumission.
+# IN: soumissionID
+# Afin de limiter les risques de scripts malicieux, si l'utilisateurs à mis des espaces dans son nom de soumission
+# on retourne une erreur. Sinon, on ajoute la soumission dans la liste de soumissions.
 @soumission.route("/soumission/addSoumission", methods=['POST'])
 def addSoumission():
     if session['id'] == None:
@@ -39,7 +44,7 @@ def addSoumission():
             print(e)
     return displaySoumissionID(newSoumissionID)
 
-
+# Fonction qui viens supprimer une soumission d'un utilisateur.
 @soumission.route("/soumission/supprimerSoumission", methods=['GET'])
 def deleteSoumission():
     if session['id'] == None:
@@ -55,10 +60,9 @@ def deleteSoumission():
     headersData = getHeaders("soumission")
     tableData = []
     soumissionID = "Soumission"
-    # ListOfSoumissions = getSoumissionList()
     return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, headers=headersData, soumissionID=soumissionID)
 
-
+# Fonction qui retourne les informations d'une soumission spécifique.
 def getData(soumissionID):
     ListOfSoumissions = getSoumissionList()
     headersData = getHeaders("soumission")
@@ -71,6 +75,7 @@ def getData(soumissionID):
         print(e)
     return ListOfSoumissions, tableData, headersData, soumissionID
 
+# Fonction qui retourne la liste des soumissions de l'utilisateur actif.
 def getSoumissionList():
     try:
         cmd = 'SELECT * FROM soumission_ids WHERE userID = ' + str(session["id"]) + ';'
@@ -81,6 +86,8 @@ def getSoumissionList():
         print(e)
     return tableData
 
+# Fonction qui calcul le total de la soumission et retourne en format FLOAT. 
+# Exception, si le total est nul, on retourne 0.
 def getTotal(sId):
     try:
         cmd = "SELECT SUM(t.subTotal) FROM (SELECT SUM(sTotal) AS subTotal FROM soumission_asso_produits WHERE sID = \'" + sId + "\') t;"
