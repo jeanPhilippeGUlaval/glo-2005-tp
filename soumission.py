@@ -62,7 +62,7 @@ def deleteSoumission():
 def getData(soumissionID):
     ListOfSoumissions = getSoumissionList()
     headersData = getHeaders("soumission")
-    cmd = 'SELECT UPPER(TAG), ID, Prix , sQuantite, sTotal FROM soumission_asso_produits d INNER JOIN produits p ON d.ProductID = p.ID AND d.sID = \'' + soumissionID + '\';'
+    cmd = 'SELECT UPPER(TAG), ID, Prix , catégorie,sQuantite, sTotal FROM soumission_asso_produits d INNER JOIN produits p ON d.ProductID = p.ID AND d.sID = \'' + soumissionID + '\';'
     try:
         cur=conn.cursor()
         cur.execute(cmd)

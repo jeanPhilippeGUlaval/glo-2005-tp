@@ -2,10 +2,10 @@ CREATE DATABASE dev;
 USE dev;
 CREATE TABLE users(ID int PRIMARY KEY AUTO_INCREMENT, email varchar(256), password varchar(256));
 
-CREATE TABLE produits(ID INT AUTO_INCREMENT PRIMARY KEY, TAG VARCHAR(70), prix int);
-CREATE TABLE porte (ID int, Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Motif int, Ferronerie varchar(24), Alliage varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
-CREATE TABLE panneaux(ID int, Catégorie varchar(30), Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
-CREATE TABLE ferronnerie(ID int, Catégorie varchar(30), Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
+CREATE TABLE produits(ID INT AUTO_INCREMENT PRIMARY KEY, TAG VARCHAR(70), Catégorie varchar(30), prix int);
+CREATE TABLE porte (ID int, Largeur int, Hauteur int, isolation varchar(4), Motif int, Ferronerie varchar(24), Alliage varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
+CREATE TABLE panneaux(ID int, Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
+CREATE TABLE ferronnerie(ID int, Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
 
 CREATE TABLE soumission_ids (ID VARCHAR(24) PRIMARY KEY, userID int, dateSoumission TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(userID) REFERENCES users(ID) ON DELETE CASCADE);
 
@@ -25,7 +25,6 @@ CREATE TRIGGER CalPrixTotalSoumission
     END //
 DELIMITER ;
 
-DROP PROCEDURE AjouterSoumission;
 DELIMITER //
 CREATE PROCEDURE AjouterSoumission(IN produitID int, IN qty int,IN soumissionID varchar(24))
 BEGIN
@@ -72,27 +71,27 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE AjouterPorte(IN categorie varchar(30), IN largeur int, IN hauteur int,IN isolation varchar(4),IN Motif int,IN Ferronerie varchar(24),IN Alliage varchar(24),IN prix int)
 BEGIN
-    INSERT INTO produits (TAG, prix) VALUES ("porte", prix);
+    INSERT INTO produits (TAG, catégorie, prix) VALUES ("porte",categorie, prix);
     SET @id_produit = LAST_INSERT_ID();
-    INSERT INTO porte VALUES (@id_produit, categorie, largeur, hauteur, isolation, Motif, Ferronerie, Alliage);
+    INSERT INTO porte VALUES (@id_produit, largeur, hauteur, isolation, Motif, Ferronerie, Alliage);
 END//
 DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE AjouterPanneaux(IN categorie varchar(30), IN largeur int, IN hauteur int,IN isolation varchar(4),IN Modele varchar(255),IN Alliage varchar(24),IN prix int)
 BEGIN
-    INSERT INTO produits (TAG, prix) VALUES ("panneaux", prix);
+    INSERT INTO produits (TAG, catégorie, prix) VALUES ("panneaux",categorie, prix);
     SET @id_produit = LAST_INSERT_ID();
-    INSERT INTO panneaux VALUES (@id_produit, categorie, largeur, hauteur, isolation, Modele, Alliage);
+    INSERT INTO panneaux VALUES (@id_produit, largeur, hauteur, isolation, Modele, Alliage);
 END//
 DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE AjouterFerronnerie(IN categorie varchar(30), IN largeur int, IN hauteur int,IN Diametre varchar(6),IN Type varchar(24),IN prix int)
 BEGIN
-    INSERT INTO produits (TAG, prix) VALUES ("ferronnerie", prix);
+    INSERT INTO produits (TAG, catégorie, prix) VALUES ("ferronnerie",categorie, prix);
     SET @id_produit = LAST_INSERT_ID();
-    INSERT INTO ferronnerie VALUES (@id_produit, categorie, largeur, hauteur, Diametre, Type);
+    INSERT INTO ferronnerie VALUES (@id_produit, largeur, hauteur, Diametre, Type);
 END//
 DELIMITER ;
 

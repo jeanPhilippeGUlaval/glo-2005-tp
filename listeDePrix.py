@@ -10,7 +10,7 @@ listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 def display(table, title):
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
-    cmd = getCmdWithHeaders(table, "t.Catégorie, t.Hauteur, t.Largeur")
+    cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur")
     try:
         cur=conn.cursor()
         cur.execute(cmd)
@@ -51,7 +51,7 @@ def index():
     if search_term:
         cmd = getCmdWithHeadersWithSearch(product, search_term)
     else:
-        cmd = getCmdWithHeaders(product, "t.Catégorie, t.Hauteur, t.Largeur")
+        cmd = getCmdWithHeaders(product, "p.Catégorie, t.Hauteur, t.Largeur")
     cur=conn.cursor()
     cur.execute(cmd)
     tableData = cur.fetchall()
@@ -111,16 +111,16 @@ def getHeaders(table):
     return
 
 def getCmdWithHeaders(table):
-    return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p;'
+    return 'SELECT p.Catégorie, t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie prix FROM produits) p;'
 
 def getCmdWithHeaders(table, orderBy):
-    return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p ORDER BY '+ orderBy + ';'
+    return 'SELECT p.Catégorie,t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p ORDER BY '+ orderBy + ';'
 
 def getCmdWithHeadersWithSearch(table, search_term, orderBy = ""):
     if orderBy == "":
-        return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p WHERE t.Catégorie LIKE \'%' + search_term + '%\''
+        return 'SELECT p.Catégorie, t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p WHERE p.Catégorie LIKE \'%' + search_term + '%\''
     else:
-        return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p WHERE t.Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
+        return 'SELECT p.Catégorie,t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p WHERE p.Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
 
 def getSoumissions(userID):
     try:

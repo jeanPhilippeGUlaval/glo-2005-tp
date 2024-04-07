@@ -59,6 +59,7 @@
             <table class="table table-striped">
               <thead>
                 <tr>
+                  <th>Catégorie</th>
                   {% for row in headers %}
                     <th onclick="OrderBy('{{tableId}}','{{lsDePrix}}','{{row}}')">{{ row }}</th>
                   {% endfor %}
@@ -73,9 +74,9 @@
                     {% for cell in row %}
                       <td>{{ cell }}</td>
                     {% endfor %}
-                    <form id="addForm-{{row[0]}}">
+                    <form id="addForm-{{row[1]}}">
                       <td>
-                        <input class="quantity-show" type="number" name="{{row[0]}}-qty" placeholder="0" min="0">
+                        <input class="quantity-show" type="number" name="{{row[1]}}-qty" placeholder="0" min="0">
                       </td>
                       <td>
                         <div class="row">
@@ -87,8 +88,8 @@
                             </select>
                           </div>
                           <div class="col-xs-6 col-md-4">
-                            <input type="hidden" name="productID" value="{{row[0]}}">
-                            <button type="submit" onclick="AddToSoumission('{{row[0]}}')">Ajouter</button> 
+                            <input type="hidden" name="productID" value="{{row[1]}}">
+                            <button type="submit" onclick="AddToSoumission('{{row[1]}}')">Ajouter</button> 
                           </div>
                         </div>
                       </td>
