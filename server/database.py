@@ -19,3 +19,5 @@ def get_session_user():
         return None
     # fetch the user from database somehow
     return session['id']
+
+TABLE_PRODUIT = ["porte","panneaux","ferronnerie"]

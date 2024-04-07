@@ -12,6 +12,7 @@ app.register_blueprint(soumission)
 app.register_blueprint(authentication)
 
 
+
 @app.route("/")
 def main():
     return signin()

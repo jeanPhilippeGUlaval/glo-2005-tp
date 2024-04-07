@@ -1,23 +1,25 @@
 from flask import render_template, request, Blueprint, session
-from database import conn, cur
+from database import conn, cur, TABLE_PRODUIT
 from authentication import signin
+import re
 
 
 listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 
 # Cette fonction permet d'être générique pour tout les affichages de tables de produits.
 def display(table, title):
-    headersData = getHeaders(table)
-    soumissions = getSoumissions(session["id"])
-    cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur")
-    try:
-        cur=conn.cursor()
-        cur.execute(cmd)
-        tableData = cur.fetchall()
-        return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
-    except Exception as e:
-        print(e)
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId=table, soumissions=soumissions)
+    if table in TABLE_PRODUIT:
+        headersData = getHeaders(table)
+        soumissions = getSoumissions(session["id"])
+        cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur")
+        try:
+            cur=conn.cursor()
+            cur.execute(cmd)
+            tableData = cur.fetchall()
+            return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
+        except Exception as e:
+            print(e)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId="porte", soumissions=soumissions)
 
 @listeDePrix.route("/listeDePrix/porte", methods=['GET'])
 def displayListeDePrixForPorte():
@@ -43,10 +45,16 @@ def index():
     if session['id'] == None:
         return signin()
     search_term = request.args.get('search', '')
+    search_term = re.sub(r'\W+', '', search_term)
+
     product = request.args.get('product', '')
+    if product not in TABLE_PRODUIT:
+        return display("porte", "Porte de Garage")
+    
     title = request.args.get('title')
     headersData = getHeaders(product)
     soumissions = getSoumissions(session["id"])
+    
     if search_term:
         cmd = getCmdWithHeadersWithSearch(product, search_term)
     else:
@@ -57,7 +65,7 @@ def index():
     cur.close()
     if tableData == None:
         return display("porte", "Porte de Garage")
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=tableData, soumissions=soumissions)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=product, soumissions=soumissions)
 
 
 @listeDePrix.route("/listeDePrix/orderBy", methods=['GET'])
@@ -66,6 +74,8 @@ def displayListeDePrixForOrderBy():
         return signin()
     orderBy = request.form.get('orderBy')
     table = request.form.get('table')
+    if table not in TABLE_PRODUIT:
+        return display("porte", "Porte de Garage")
     title = request.form.get('title')
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
