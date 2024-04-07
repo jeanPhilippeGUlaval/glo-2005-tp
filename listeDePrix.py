@@ -10,7 +10,7 @@ listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 def display(table, title):
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
-    cmd = getCmdWithHeaders(headersData, table, "Catégorie, Hauteur, Largeur")
+    cmd = getCmdWithHeaders(table, "t.Catégorie, t.Hauteur, t.Largeur")
     try:
         cur=conn.cursor()
         cur.execute(cmd)
@@ -49,9 +49,9 @@ def index():
     headersData = getHeaders(product)
     soumissions = getSoumissions(session["id"])
     if search_term:
-        cmd = getCmdWithHeadersWithSearch(headersData,product, search_term)
+        cmd = getCmdWithHeadersWithSearch(product, search_term)
     else:
-        cmd = getCmdWithHeaders(headersData, product, "Catégorie, Hauteur, Largeur")
+        cmd = getCmdWithHeaders(product, "t.Catégorie, t.Hauteur, t.Largeur")
     cur=conn.cursor()
     cur.execute(cmd)
     tableData = cur.fetchall()
@@ -70,7 +70,7 @@ def displayListeDePrixForOrderBy():
     title = request.form.get('title')
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
-    cmd = getCmdWithHeaders(headersData, table, orderBy)
+    cmd = getCmdWithHeaders(table, orderBy)
     try:
         cur=conn.cursor()
         cur.execute(cmd)
@@ -90,11 +90,7 @@ def addItemToSoumission():
     print(qty)
     soumissionID = request.form.get('soumissionID')
     try:
-        tableToAdd = getTableToAddItem(productID)
-        if len(tableToAdd) == 0:
-            return "Error"
-        cmd = 'CALL AjouterSoumission(\''+tableToAdd[0]+'\', '+str(productID)+', '+str(qty)+', \''+soumissionID+'\',\''+tableToAdd[1]+'\');'
-        # cmd = 'INSERT INTO '+ str(tableToAdd) +' (sID, ProductID, sQuantite) VALUES (\''+soumissionID+'\', '+ str(productID) +', '+ str(qty) +');'
+        cmd = 'CALL AjouterSoumission('+str(productID)+', '+str(qty)+', \''+soumissionID+'\');'
         print(cmd)
         cur.execute(cmd)
         conn.commit()
@@ -103,25 +99,9 @@ def addItemToSoumission():
     return "Ok"
 
 
-def getTableToAddItem(itemID):
-   cmd = 'SELECT produit FROM produits WHERE ID_Produit = '+str(itemID)+';'
-   cur.execute(cmd)
-   conn.commit()
-   table = cur.fetchone()[0]
-   
-   match table:
-       case 'porte':
-           return ['soumission_asso_porte', 'porte']
-       case 'panneaux':
-           return ['soumission_asso_panneaux', 'panneaux']
-       case 'ferronnerie':
-           return ['soumission_asso_ferronnerie', 'ferronnerie']
-
-   return table
-
 def getHeaders(table):
     try:
-        cmd='SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = \''+table+'\' AND (COLUMN_KEY = \'\' OR COLUMN_KEY = \'PRI\') ORDER BY ORDINAL_POSITION;'
+        cmd='SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = \''+table+'\' ORDER BY ORDINAL_POSITION;'
         cur=conn.cursor()
         cur.execute(cmd)
         headersData = [row[0] for row in cur.fetchall()]
@@ -130,20 +110,17 @@ def getHeaders(table):
         print(e)
     return
 
-def getCmdWithHeaders(headersData, table):
-    headers = str.join(", ",headersData)
-    return 'SELECT ' + headers + 'FROM' + table + ';'
+def getCmdWithHeaders(table):
+    return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p;'
 
-def getCmdWithHeaders(headersData, table, orderBy):
-    headers = str.join(",",headersData)
-    return 'SELECT ' + headers + ' FROM ' + table +' ORDER BY '+ orderBy + ';'
+def getCmdWithHeaders(table, orderBy):
+    return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p ORDER BY '+ orderBy + ';'
 
-def getCmdWithHeadersWithSearch(headersData, table, search_term, orderBy = ""):
-    headers = str.join(",",headersData)
+def getCmdWithHeadersWithSearch(table, search_term, orderBy = ""):
     if orderBy == "":
-        return 'SELECT '+ headers + ' FROM '+ table + ' WHERE Catégorie LIKE \'%' + search_term + '%\''
+        return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p WHERE t.Catégorie LIKE \'%' + search_term + '%\''
     else:
-        return 'SELECT ' + headers + ' FROM ' + table +' WHERE Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
+        return 'SELECT t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, prix FROM produits) p WHERE t.Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
 
 def getSoumissions(userID):
     try:

@@ -62,16 +62,7 @@ def deleteSoumission():
 def getData(soumissionID):
     ListOfSoumissions = getSoumissionList()
     headersData = getHeaders("soumission")
-    cmd = """SELECT ProductID, TAG, catégorie, prix, sQuantite, sTotal
-FROM (
-    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_porte d INNER JOIN porte p ON d.ProductID = p.ID UNION ALL
-    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_panneaux d INNER JOIN panneaux p ON d.ProductID = p.ID UNION ALL
-    SELECT TAG, ID AS ProductID , prix, catégorie, sQuantite, sTotal FROM soumission_asso_ferronnerie d INNER JOIN ferronnerie p ON d.ProductID = p.ID
-) AS products
-WHERE ProductID IN (
-    SELECT ProductID FROM soumission_asso_panneaux WHERE sID = '""" + soumissionID + """' UNION ALL
-    SELECT ProductID FROM soumission_asso_porte WHERE sID = '""" + soumissionID + """' UNION ALL
-    SELECT ProductID FROM soumission_asso_ferronnerie WHERE sID = '""" + soumissionID + """');"""
+    cmd = 'SELECT UPPER(TAG), ID, Prix , sQuantite, sTotal FROM soumission_asso_produits d INNER JOIN produits p ON d.ProductID = p.ID AND d.sID = \'' + soumissionID + '\';'
     try:
         cur=conn.cursor()
         cur.execute(cmd)
@@ -92,10 +83,7 @@ def getSoumissionList():
 
 def getTotal(sId):
     try:
-        cmd = """SELECT SUM(t.subTotal) FROM 
-(SELECT SUM(sTotal) AS subTotal FROM soumission_asso_porte WHERE sID = \'""" + sId + """\' UNION ALL 
-SELECT SUM(sTotal) AS subTotal FROM soumission_asso_panneaux WHERE sID = \'""" + sId + """\'  UNION ALL 
-SELECT SUM(sTotal) AS subTotal FROM soumission_asso_ferronnerie WHERE sID = \'""" + sId + """\') t;"""
+        cmd = "SELECT SUM(t.subTotal) FROM (SELECT SUM(sTotal) AS subTotal FROM soumission_asso_produits WHERE sID = \'" + sId + "\') t;"
         cur=conn.cursor()
         cur.execute(cmd)
         total = cur.fetchone()[0]
