@@ -1,5 +1,5 @@
 run:
-	python3 main.py
+	python3 server/main.py
 
 init-bd-l:
 	@sudo mysql -u root -p -e "source ./scripts/create_bd.sql"

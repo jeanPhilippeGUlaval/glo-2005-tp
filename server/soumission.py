@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Blueprint
+from flask import render_template, request, Blueprint
 from database import *
 from listeDePrix import getHeaders
 from authentication import signin

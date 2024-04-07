@@ -16,63 +16,47 @@ sTotal DECIMAL,
 FOREIGN KEY (ProductID) REFERENCES produits(ID) ON DELETE CASCADE,
 FOREIGN KEY (sID) REFERENCES soumission_ids(ID) ON DELETE CASCADE);
 
+/*
+    Cette Procédure s'occupe d'ajouter des items dans la table d'association de soumission avec produit.
+    Sa logique est de vérifier si le produit est déjà présent dans la soumission, si oui, elle ajoute la nouvelle quantité
+    et recalcule son total, sinon elle rajoute le nouveau produit dans la table. 
+*/
 DELIMITER //
-CREATE TRIGGER CalPrixTotalSoumission
-    BEFORE INSERT ON soumission_asso_produits
-    FOR EACH ROW
-    BEGIN
-        SET NEW.sTotal = (SELECT SUM(p.prix * NEW.sQuantite) FROM produits p WHERE p.ID = NEW.ProductID);
-    END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE AjouterSoumission(IN produitID int, IN qty int,IN soumissionID varchar(24))
+CREATE PROCEDURE AjouterSoumission(IN param_produitID int, IN qty int,IN soumissionID varchar(24))
 BEGIN
     DECLARE total DECIMAL;    
-    SET @sql := CONCAT("SELECT ProductID FROM soumission_asso_produits WHERE ProductID = ", produitID, " AND sID = '",soumissionID,"';");
-    PREPARE stmt FROM @sql;
-    EXECUTE stmt;
-    DEALLOCATE PREPARE stmt;
-    
-    IF FOUND_ROWS() > 0 THEN
-        SET @sql := CONCAT("SELECT sQuantite into @tempQty FROM soumission_asso_produits WHERE ProductID = ", produitID, " AND sID = '",soumissionID,"';");
-        PREPARE stmt FROM @sql;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-        
-        SET @NewQty = qty + @tempQty;
-        SET @sql := CONCAT("SELECT prix into @tempPrix FROM produits WHERE ID = ", produitID,";");
-        PREPARE stmt FROM @sql;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-        
-        SET total = @NewQty * @tempPrix;
-        
-        SET @sql := CONCAT("UPDATE soumission_asso_produits SET sQuantite = ",@NewQty,", sTotal = ",total," WHERE ProductID = ",produitID, " AND sID ='",soumissionID,"';");
-        PREPARE stmt FROM @sql;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
+    -- On viens sélectionner le produit dans la table de soumission et si il retourne rien, 
+    -- on vient l'ajouter, sinon on met à jour la table avec les nouvelles valeurs.
+    IF EXISTS (SELECT * FROM soumission_asso_produits WHERE ProductID = param_produitID AND sID = soumissionID) THEN
+        -- Ici on viens chercher la quantité du produits dans la table ainsi que son prix unitaire.
+        CREATE TEMPORARY TABLE temp_table AS SELECT s.sQuantite, p.prix FROM soumission_asso_produits s INNER JOIN (SELECT ID, prix from produits WHERE ID = param_produitID) p ON p.ID = s.ProductID WHERE s.ProductID = param_produitID AND s.sID = soumissionID;
+        -- On viens additionner l'ancienne quantité avec la nouvelle.
+        SET @NewQty = qty +  (SELECT sQuantite FROM temp_table);
+        -- Ajuste le prix avec le prix unitaire actuel (Si le prix change pendant que l'utilisateur crée sa soumission, celui-ci sera mis à jour)
+        SET total = @NewQty * (SELECT prix FROM temp_table);
+        -- On viens mettre à jour la table avec la nouvelle quantité et le nouveau prix total
+        UPDATE soumission_asso_produits SET sQuantite = @NewQty, sTotal = total WHERE ProductID = param_produitID AND sID = soumissionID ;
+        DROP TEMPORARY TABLE temp_table;
     ELSE
-        SET @sql := CONCAT("SELECT prix into @tempPrix FROM produits WHERE ID = ", produitID,";");
-        PREPARE stmt FROM @sql;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
-        
-        SET total = qty * @tempPrix;
-        
-        SET @sql := CONCAT("INSERT INTO soumission_asso_produits (sID, ProductID, sQuantite, sTotal) VALUES ('",soumissionID,"',",produitID,",",qty,",",total,");");
-        PREPARE stmt FROM @sql;
-        EXECUTE stmt;
-        DEALLOCATE PREPARE stmt;
+        -- Si le produit n'existe pas déjà dans la table de soumission, on 
+        -- viens chercher son prix unitaire actuel et fait simplement l'ajouter dans la table de soumission
+        SET total = qty * (SELECT prix FROM produits WHERE ID = param_produitID);
+        INSERT INTO soumission_asso_produits (sID, ProductID, sQuantite, sTotal) VALUES (soumissionID, param_produitID, qty, total);
     END IF;
 END //
 DELIMITER ;
-
+/*
+    Les procédures suivantes permettent d'ajouter un nouveau produit dans la table de spécialisation. Étant des spécialisation
+    de produits, nous devons avoir une procédure afin de remplir les deux tables avec les bonnes informations.
+*/
 DELIMITER //
 CREATE PROCEDURE AjouterPorte(IN categorie varchar(30), IN largeur int, IN hauteur int,IN isolation varchar(4),IN Motif int,IN Ferronerie varchar(24),IN Alliage varchar(24),IN prix int)
 BEGIN
+    -- On ajoute le tag qui représente la table correspondante, la catégorie de produits ainsi que le prix. 
+    -- l'ID est généré automatiquement.
     INSERT INTO produits (TAG, catégorie, prix) VALUES ("porte",categorie, prix);
     SET @id_produit = LAST_INSERT_ID();
+    -- On prend l'ID crée et l'ajoutons dans la table porte (spécialisation)
     INSERT INTO porte VALUES (@id_produit, largeur, hauteur, isolation, Motif, Ferronerie, Alliage);
 END//
 DELIMITER ;
@@ -80,8 +64,11 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE AjouterPanneaux(IN categorie varchar(30), IN largeur int, IN hauteur int,IN isolation varchar(4),IN Modele varchar(255),IN Alliage varchar(24),IN prix int)
 BEGIN
+    -- On ajoute le tag qui représente la table correspondante, la catégorie de produits ainsi que le prix. 
+    -- l'ID est généré automatiquement.
     INSERT INTO produits (TAG, catégorie, prix) VALUES ("panneaux",categorie, prix);
     SET @id_produit = LAST_INSERT_ID();
+    -- On prend l'ID crée et l'ajoutons dans la table panneaux (spécialisation)
     INSERT INTO panneaux VALUES (@id_produit, largeur, hauteur, isolation, Modele, Alliage);
 END//
 DELIMITER ;
@@ -89,102 +76,14 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE AjouterFerronnerie(IN categorie varchar(30), IN largeur int, IN hauteur int,IN Diametre varchar(6),IN Type varchar(24),IN prix int)
 BEGIN
+    -- On ajoute le tag qui représente la table correspondante, la catégorie de produits ainsi que le prix. 
+    -- l'ID est généré automatiquement.
     INSERT INTO produits (TAG, catégorie, prix) VALUES ("ferronnerie",categorie, prix);
     SET @id_produit = LAST_INSERT_ID();
+    -- On prend l'ID crée et l'ajoutons dans la table ferronnerie (spécialisation)
     INSERT INTO ferronnerie VALUES (@id_produit, largeur, hauteur, Diametre, Type);
 END//
 DELIMITER ;
-
--- DELIMITER //
--- CREATE TRIGGER porte_insert 
--- BEFORE INSERT ON porte 
--- FOR EACH ROW
--- BEGIN
---   INSERT INTO produits (produit) VALUES ('porte');
---   SET NEW.ID = LAST_INSERT_ID();
---   SET NEW.TAG = 'PORTE DE GARAGE';
--- END//
--- DELIMITER ;
-
--- DELIMITER //
--- CREATE TRIGGER panneau_insert 
--- BEFORE INSERT ON panneaux 
--- FOR EACH ROW
--- BEGIN
---   INSERT INTO produits (produit) VALUES ('panneaux');
---   SET NEW.ID = LAST_INSERT_ID();
---   SET NEW.TAG = 'PANNEAUX';
--- END//
--- DELIMITER ;
-
--- DELIMITER //
--- CREATE TRIGGER ferro_insert 
--- BEFORE INSERT ON ferronnerie 
--- FOR EACH ROW
--- BEGIN
---   INSERT INTO produits (produit) VALUES ('ferronnerie');
---   SET NEW.ID = LAST_INSERT_ID();
---   SET NEW.TAG = 'FERRONNERIE';
--- END//
--- DELIMITER ;
-
-
-
--- INSERT INTO Vehicle (vehicle_type, common_attribute1, common_attribute2)
--- VALUES ('Car', 'Value1', 'Value2');
-
--- -- Get the ID of the inserted Vehicle
--- SET @last_vehicle_id = LAST_INSERT_ID();
-
--- -- Insert into Car table
--- INSERT INTO Car (vehicle_id, car_specific_attribute)
--- VALUES (@last_vehicle_id, 'Car specific value');
-
--- CREATE TABLE soumission_asso_porte(sID VARCHAR(24),
--- ProductID int NOT NULL,
--- sQuantite int NOT NULL,
--- sTotal DECIMAL,
--- FOREIGN KEY (ProductID) REFERENCES porte(ID) ON DELETE CASCADE,
--- FOREIGN KEY (sID) REFERENCES soumission_ids(ID) ON DELETE CASCADE);
-
--- CREATE TABLE soumission_asso_panneaux(sID VARCHAR(24),
--- ProductID int NOT NULL,
--- sQuantite int NOT NULL,
--- sTotal DECIMAL,
--- FOREIGN KEY (ProductID) REFERENCES panneaux(ID) ON DELETE CASCADE,
--- FOREIGN KEY (sID) REFERENCES soumission_ids(ID) ON DELETE CASCADE);
-
--- CREATE TABLE soumission_asso_ferronnerie(sID VARCHAR(24),
--- ProductID int NOT NULL,
--- sQuantite int NOT NULL,
--- sTotal DECIMAL,
--- FOREIGN KEY (ProductID) REFERENCES ferronnerie(ID) ON DELETE CASCADE,
--- FOREIGN KEY (sID) REFERENCES soumission_ids(ID) ON DELETE CASCADE);
-
-
--- DELIMITER //
--- CREATE TRIGGER CalPrixTotalPanneau
---     BEFORE INSERT ON soumission_asso_panneaux
---     FOR EACH ROW
---     BEGIN
---         SET NEW.sTotal = (SELECT SUM(p.prix * NEW.sQuantite) FROM panneaux p WHERE p.ID = NEW.ProductID);
---     END //
--- DELIMITER ;
-
--- DELIMITER //
--- CREATE TRIGGER CalPrixTotalPorte
---     BEFORE INSERT ON soumission_asso_porte
---     FOR EACH ROW
---     BEGIN
---         SET NEW.sTotal = (SELECT SUM(p.prix * NEW.sQuantite) FROM porte p WHERE p.ID = NEW.ProductID);
---     END //
--- DELIMITER ;
-
--- DELIMITER //
--- CREATE TRIGGER CalPrixTotalFerronnerie
---     BEFORE INSERT ON soumission_asso_ferronnerie
---     FOR EACH ROW
---     BEGIN
---         SET NEW.sTotal = (SELECT SUM(f.prix * NEW.sQuantite) FROM ferronnerie f WHERE f.ID = NEW.ProductID);
---     END //
--- DELIMITER ;
+/*
+    Fin des procédures de création de spécialisation, créer de nouvelle procédure si on ajoute de nouveau produits.
+*/

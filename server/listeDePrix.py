@@ -1,12 +1,11 @@
-from flask import Flask, render_template, request, Blueprint, session
+from flask import render_template, request, Blueprint, session
 from database import conn, cur
-import pymysql.cursors
 from authentication import signin
 
 
 listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 
-
+# Cette fonction permet d'être générique pour tout les affichages de tables de produits.
 def display(table, title):
     headersData = getHeaders(table)
     soumissions = getSoumissions(session["id"])
@@ -122,6 +121,7 @@ def getCmdWithHeadersWithSearch(table, search_term, orderBy = ""):
     else:
         return 'SELECT p.Catégorie,t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p WHERE p.Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
 
+# Cette fonction permet de 
 def getSoumissions(userID):
     try:
         cmd= 'SELECT ID FROM soumission_ids WHERE userID = '+str(userID)+';'
