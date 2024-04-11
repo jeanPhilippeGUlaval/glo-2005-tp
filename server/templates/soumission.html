@@ -93,10 +93,15 @@
         </div>
       </div>
     </div>
-
     <!-- Conteneur principal -->
     <div class="container">
+      {% if error != '' %}
+      <div class="alert alert-danger" role="alert">
+        <p>{{ error }}</p>
+      </div>
+      {% endif %}
       <h2 class="sub-header">{{soumissionID}}</h2>
+      <h4>Création: {{date}}</h4>
       <div class="table-responsive">
         <table class="table table-striped">
           <thead>
@@ -127,6 +132,11 @@
         </div>
         <!-- Bouton pour supprimer la soumission -->
         <button type="submit" class="btn btn-danger" onclick="deleteSoumission('{{soumissionID}}')">Supprimer la soumission</button>
+        {% if envoye != 1 %}
+        <button type="submit" class="btn btn-success" onclick="sendSoumission('{{soumissionID}}')">Envoyer la soumission</button>
+        {% else %}
+        <button type="submit" class="btn btn-success disabled" >Soumission déjà envoyé</button>
+        {% endif %}
       </div>
     </div>
     

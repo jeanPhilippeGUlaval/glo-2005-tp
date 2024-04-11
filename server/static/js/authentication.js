@@ -7,6 +7,10 @@ function GotoSignIn()
 {
     location.href = "signin";
 }
+function GoToForgotPassword()
+{
+    location.href = "forgotPassword"
+}
 
 function createAnAccount()
 {
@@ -18,6 +22,24 @@ function noPadding()
     document.getElementById("inputPassword").style.marginBottom="-1";
 }
 
+function validateChangePassword()
+{
+    var myInput = document.getElementById("inputPassword");
+
+    myInput.onblur = function() {
+        document.getElementById("message").style.display = "none";
+    }
+
+    myInput.onfocus = function() {
+        document.getElementById("message").style.display = "block";
+    }
+
+
+    if (validateRepeat() && validateMDP())
+    {
+        document.getElementById("changePassword").disabled=false;
+    }
+}
 
 function validate()
 {

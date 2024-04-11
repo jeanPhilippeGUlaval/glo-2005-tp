@@ -14,3 +14,8 @@ function deleteSoumission(soumissionID)
 {
   location.href= "/soumission/supprimerSoumission?id="+ soumissionID
 }
+
+function sendSoumission(soumissionID)
+{
+  location.href= "/soumission/envoyerSoumission?id="+ soumissionID
+}

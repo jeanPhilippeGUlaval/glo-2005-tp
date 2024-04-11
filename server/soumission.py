@@ -1,26 +1,35 @@
 from flask import render_template, request, Blueprint
 from database import *
-from listeDePrix import getHeaders
 from authentication import signin
+from config import smtp_server, sender_email, password, port
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.encoders import encode_base64
+from common import getHeaders, getAllSoumissionList
+import smtplib, ssl, csv
 
 
 soumission = Blueprint('soumission', __name__, template_folder='templates')
 
 # Fonction qui affiche la page principal des soumissions d'un utilisateur.
 @soumission.route("/soumission", methods=["GET"])
-def displaySoumissionID(soumissionID =""):
+def displaySoumissionID(soumissionID ="", erreur = ""):
     if session['id'] == None:
         return signin()
     if soumissionID == "":
         soumissionID = request.args.get('id')
     if soumissionID == "" or soumissionID == None:
-        ListOfSoumissions = getSoumissionList()
+        ListOfSoumissions = getAllSoumissionList()
         headersData = getHeaders("soumission")
         tableData = []
         soumissionID = "Soumission"
     else:
         ListOfSoumissions, tableData, headersData, soumissionID = getData(soumissionID)
-    return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, headers=headersData, soumissionID=soumissionID, total=getTotal(soumissionID))
+        envoye, date = getSoumissionMetadata(soumissionID)
+    return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, 
+                           headers=headersData, soumissionID=soumissionID, total=getTotal(soumissionID), error = erreur, 
+                           envoye = envoye, date = date)
 
 # Fonction qui vient créer une nouvelle soumission.
 # IN: soumissionID
@@ -56,17 +65,42 @@ def deleteSoumission():
         conn.commit()
     except Exception as e:
         print(e)
-    ListOfSoumissions = getSoumissionList()
-    headersData = getHeaders("soumission")
-    tableData = []
-    soumissionID = "Soumission"
-    return render_template("soumission.html", lsSoumission=ListOfSoumissions, data = tableData, headers=headersData, soumissionID=soumissionID)
+    return displaySoumissionID()
+
+@soumission.route("/soumission/envoyerSoumission", methods=['GET'])
+def envoyeSoumission():
+    SoumissionID = request.args.get('id')
+    email = getEmailofActiveUser()
+    if email == "":
+        return displaySoumissionID()
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        receiver_email = getEmailofActiveUser()
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = "Confirmation de la soumission: "+ SoumissionID
+
+        formatTableForEmail(SoumissionID)
+ 
+        part2 = MIMEBase('application', "octet-stream")
+        part2.set_payload(open("/tmp/file_name.csv", "rb").read()) 
+        encode_base64(part2)
+        part2.add_header('Content-Disposition', 'attachment; filename="soumission_'+SoumissionID+'.csv"')
+        
+        msg.attach(MIMEText("Confirmation de votre soumission envoyé", 'text'))
+        msg.attach(part2)
+
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        erreur = setEnvoyeToTrue(SoumissionID)
+        if erreur != "":
+            return displaySoumissionID("",erreur)
+    return displaySoumissionID()
 
 # Fonction qui retourne les informations d'une soumission spécifique.
 def getData(soumissionID):
-    ListOfSoumissions = getSoumissionList()
+    ListOfSoumissions = getAllSoumissionList()
     headersData = getHeaders("soumission")
-    cmd = 'SELECT UPPER(TAG), ID, Prix , catégorie,sQuantite, sTotal FROM soumission_asso_produits d INNER JOIN produits p ON d.ProductID = p.ID AND d.sID = \'' + soumissionID + '\' AND d.userID = ' + str(session["id"]) + ';'
+    cmd = 'SELECT UPPER(TAG), ID, Prix , catégorie,sQuantite, sTotal FROM soumission_asso_produits d INNER JOIN produits p ON d.ProductID = p.ID AND d.sID = \'' + soumissionID + '\';'
     try:
         cur=conn.cursor()
         cur.execute(cmd)
@@ -75,16 +109,17 @@ def getData(soumissionID):
         print(e)
     return ListOfSoumissions, tableData, headersData, soumissionID
 
-# Fonction qui retourne la liste des soumissions de l'utilisateur actif.
-def getSoumissionList():
+def getSoumissionMetadata(soumissionID):
     try:
-        cmd = 'SELECT * FROM soumission_ids WHERE userID = ' + str(session["id"]) + ';'
+        cmd = 'SELECT envoye, dateSoumission FROM soumission_ids WHERE ID = \''+soumissionID+'\';'
         cur=conn.cursor()
         cur.execute(cmd)
-        tableData = [row[0] for row in cur.fetchall()]
+        metadata = cur.fetchone()
+        print(metadata)
     except Exception as e:
         print(e)
-    return tableData
+    return metadata[0], metadata[1]
+
 
 # Fonction qui calcul le total de la soumission et retourne en format FLOAT. 
 # Exception, si le total est nul, on retourne 0.
@@ -99,3 +134,32 @@ def getTotal(sId):
     except Exception as e:
         print(e)
     return float(total)
+
+def getEmailofActiveUser():
+    id = session['id']
+    try:
+        cmd = 'SELECT email FROM users WHERE ID = '+str(id)+';'
+        cur=conn.cursor()
+        cur.execute(cmd)
+        email = cur.fetchone()[0]
+    except Exception:
+        return ""
+    return email
+
+def formatTableForEmail(soumissionID):
+    _, tableData, _ ,_ = getData(soumissionID)
+    fp = open('/tmp/file_name.csv', 'w')    # You pick a name, it's temporary
+    attach_file = csv.writer(fp)
+    attach_file.writerows(tableData)
+    fp.close()
+    return attach_file
+
+def setEnvoyeToTrue(soumissionID):
+    try:
+        cmd = 'UPDATE soumission_ids SET envoye = 1 WHERE ID = \''+soumissionID+'\';'
+        cur=conn.cursor()
+        cur.execute(cmd)
+        conn.commit()
+    except Exception:
+        return "Erreur: Veuillez réessayer plus tard."
+    return ""

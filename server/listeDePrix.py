@@ -1,6 +1,7 @@
 from flask import render_template, request, Blueprint, session
 from database import conn, cur, TABLE_PRODUIT
 from authentication import signin
+from common import getHeaders, getOpenSoumissionList
 import re
 
 
@@ -11,7 +12,7 @@ def display(table, title):
     # On s'assure que la table demandé fait partie des tables de produits.
     if table in TABLE_PRODUIT:
         headersData = getHeaders(table)
-        soumissions = getSoumissions(session["id"])
+        soumissions = getOpenSoumissionList()
         cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur")
         try:
             cur=conn.cursor()
@@ -59,7 +60,7 @@ def index():
     
     title = request.args.get('title')
     headersData = getHeaders(product)
-    soumissions = getSoumissions(session["id"])
+    soumissions = getOpenSoumissionList()
     
     if search_term:
         cmd = getCmdWithHeadersWithSearch(product, search_term)
@@ -86,7 +87,7 @@ def displayListeDePrixForOrderBy():
         return display("porte", "Porte de Garage")
     title = request.form.get('title')
     headersData = getHeaders(table)
-    soumissions = getSoumissions(session["id"])
+    soumissions = getOpenSoumissionList()
     cmd = getCmdWithHeaders(table, orderBy)
     try:
         cur=conn.cursor()
@@ -119,20 +120,6 @@ def addItemToSoumission():
         print(e)
     return "Ok"
 
-# Cette fonction nous permet d'aller chercher les titre de colonne d'une table. Cela nous permet donc
-# d'être dynamique sur l'affichage en HTML que l'on produit. On envoi ensuite les titres de colonnes
-# à la page HTML. Cela permet aussi de diminuer la quantité de code à faire à chaque fois qu'on rajoute
-# une table de produit.
-def getHeaders(table):
-    try:
-        cmd='SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = \''+table+'\' ORDER BY ORDINAL_POSITION;'
-        cur=conn.cursor()
-        cur.execute(cmd)
-        headersData = [row[0] for row in cur.fetchall()]
-        return headersData
-    except Exception as e:
-        print(e)
-    return
 
 # Cette fonction permet de genéré un commande SQL à partir d'information injecter.
 def getCmdWithHeaders(table):
@@ -148,16 +135,4 @@ def getCmdWithHeadersWithSearch(table, search_term, orderBy = ""):
         return 'SELECT p.Catégorie, t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p WHERE p.Catégorie LIKE \'%' + search_term + '%\''
     else:
         return 'SELECT p.Catégorie,t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p WHERE p.Catégorie LIKE \'%' + search_term + '%\' ORDER BY '+ orderBy + ';'
-
-# Cette fonction permet d'aller chercher toutes les soumissions appartenant à l'utilisateur
-def getSoumissions(userID):
-    try:
-        cmd= 'SELECT ID FROM soumission_ids WHERE userID = '+str(userID)+';'
-        cur=conn.cursor()
-        cur.execute(cmd)
-        soumissions = [row[0] for row in cur.fetchall()]
-        return soumissions
-    except Exception as e:
-        print(e)
-    return
 
