@@ -17,3 +17,8 @@ make init-bd
 ```
 make run
 ```
+
+## Rouler le serveur smtp
+```
+sudo python3 -m smtpd -c DebuggingServer -n localhost:1025
+```
