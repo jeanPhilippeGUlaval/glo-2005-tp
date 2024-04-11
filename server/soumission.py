@@ -67,10 +67,12 @@ def deleteSoumission():
         print(e)
     return displaySoumissionID()
 
+# Fonction qui envoi les courriels de confirmation avec la soumission.
 @soumission.route("/soumission/envoyerSoumission", methods=['GET'])
 def envoyeSoumission():
     SoumissionID = request.args.get('id')
     email = getEmailofActiveUser()
+    # Si jamais, une erreur s'est produite et que l'utilisateur n'était pas valide, il ne peux pas envoyé de courriel
     if email == "":
         return displaySoumissionID()
     context = ssl.create_default_context()
@@ -80,18 +82,18 @@ def envoyeSoumission():
         msg['Subject'] = "Confirmation de la soumission: "+ SoumissionID
 
         formatTableForEmail(SoumissionID)
- 
-        part2 = MIMEBase('application', "octet-stream")
-        part2.set_payload(open("/tmp/file_name.csv", "rb").read()) 
-        encode_base64(part2)
-        part2.add_header('Content-Disposition', 'attachment; filename="soumission_'+SoumissionID+'.csv"')
+
+        part2 = MIMEBase('application', "octet-stream") #Création d'un stream d'octet pour envoyé le fichier CSV
+        part2.set_payload(open("/tmp/soumiTemp.csv", "rb").read())  #Ouverture du fichier pour lecture, on le met en payload dans le courriel
+        encode_base64(part2) # Encode le payload
+        part2.add_header('Content-Disposition', 'attachment; filename="soumission_'+SoumissionID+'.csv"') #Ajoute le fichier en header pour qu'il soit disponible.
         
         msg.attach(MIMEText("Confirmation de votre soumission envoyé", 'text'))
         msg.attach(part2)
 
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
-        erreur = setEnvoyeToTrue(SoumissionID)
+        erreur = setEnvoyeToTrue(SoumissionID) # Ici on vient marqué dans la base de donnée que la soumission à été envoyé afin qu'elle ne soit pas réenvoyé inutilement.
         if erreur != "":
             return displaySoumissionID("",erreur)
     return displaySoumissionID()
@@ -109,6 +111,7 @@ def getData(soumissionID):
         print(e)
     return ListOfSoumissions, tableData, headersData, soumissionID
 
+# Retourne les information lié à la soumission (s'il est déjà envoyé et la date de création)
 def getSoumissionMetadata(soumissionID):
     try:
         cmd = 'SELECT envoye, dateSoumission FROM soumission_ids WHERE ID = \''+soumissionID+'\';'
@@ -146,14 +149,17 @@ def getEmailofActiveUser():
         return ""
     return email
 
+# Foncion qui vient prendre la table de donnée avec la bonne soumission et la met dans un fichier
+# csv temporaire. Ce fichier sera ensuite lu afin d'être envoyé par courriel.
 def formatTableForEmail(soumissionID):
     _, tableData, _ ,_ = getData(soumissionID)
-    fp = open('/tmp/file_name.csv', 'w')    # You pick a name, it's temporary
+    fp = open('/tmp/soumiTemp.csv', 'w')    # You pick a name, it's temporary
     attach_file = csv.writer(fp)
     attach_file.writerows(tableData)
     fp.close()
     return attach_file
 
+# Fonction qui vient mettre à jour la table des soumissions pour inscrire si celle-ci est à jour.
 def setEnvoyeToTrue(soumissionID):
     try:
         cmd = 'UPDATE soumission_ids SET envoye = 1 WHERE ID = \''+soumissionID+'\';'

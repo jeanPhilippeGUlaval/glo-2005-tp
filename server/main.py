@@ -5,10 +5,12 @@ from soumission import soumission
 from authentication import authentication, signin
 from flask import Flask
 import os
+from dotenv import load_dotenv
+
 
 
 # Le secret KEY de l'app permet d'avoir la classe Session et garder l'ID de l'utilisateur actif.
-
+load_dotenv(override=True)
 app = Flask(__name__)
 app.secret_key = os.environ.get('APP_SECRET_KEY')
 

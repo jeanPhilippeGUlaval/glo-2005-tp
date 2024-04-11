@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 import smtplib, ssl
 from database import conn, cur
 from random import randint
-import hashlib, uuid
+import hashlib, uuid, os
 
 
 # Logique d'affaire pour l'authentification
@@ -76,10 +76,15 @@ def logout():
     session['id'] = None
     return signin()
 
+#Fonction qui retourne la page de mot de passe oublié.
 @authentication.route("/forgotPassword")
 def forgotPassword():
     return render_template('forgotPassword.html')
 
+# Fonction qui envoi un courriel pour un oublie de mot de passe.
+# On utilise le courriel et on génère un token. Par la suite, nous insérons dans une base de donnée le courriel et le token ensemble
+# Ce token permet de gérer que n'importe qui ne puisse pas envoyer des demandes d'oublie de mot de passe.
+# On utilise un serveur smtp.
 @authentication.route("/sendForgotPassword", methods=['POST'])
 def sendforgotPassword():
     email = request.form.get('inputEmail')
@@ -88,10 +93,10 @@ def sendforgotPassword():
     
     token = generateToken()
     insertTokenAndEmailInForgottenTable(email, token)
-    redirectUrl = 'http://127.0.0.1:5000/changePasswordPage?email=' + email +'&token='+str(token)
+    redirectUrl = 'http://'+ os.environ.get('HOST')+ '/changePasswordPage?email=' + email +'&token='+str(token) # Création du lien de redirection pour que la personne puisse changer son mot de passe.
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        receiver_email = email
+        receiver_email = email    # Courriel à qui on veux changer le mot de passe.
         msg = MIMEMultipart('alternative')
         msg['Subject'] = "Changez votre mot de passe"
         message = """<html>
@@ -101,13 +106,15 @@ def sendforgotPassword():
             <p><a href=\"""" + redirectUrl + """"\">Cliquez ici pour changer votre mot de passe</a></
         </body>
     </html>
-"""
+""" # Message formaté en HTML pour le lien
         part2 = MIMEText(message, 'html')
         msg.attach(part2)
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.login(sender_email, password) # Connexion à la boite de courriel d'envoi du site
+        server.sendmail(sender_email, receiver_email, msg.as_string()) # Envoi du courriel.
     return signin("", "Un courriel à été envoyé avec les informations pour changer votre mot de passe")
 
+#Cette fonction retourne la page de changement de mot de passe. Elle prend en entré le token et vérifie si celui-ci
+# est toujours valide.
 @authentication.route("/changePasswordPage")
 def changePasswordPage():
     email = request.args.get('email')
@@ -117,6 +124,8 @@ def changePasswordPage():
         return signin("Lien expiré")
     return render_template("changePassword.html", token = token, email = email)
 
+# Cette fonction permet de changer le mot de passe dans la base de donnée d'utilisateur.
+# Elle vient aussi supprimer de la table forgotPassword l'entrée du courriel et du token.
 @authentication.route("/changePassword", methods=['POST'])
 def changePassword():
     email = request.form.get('inputEmail')
@@ -149,9 +158,11 @@ def checkIfEmailExist(email):
             return True
         return False
 
+# Fontion qui génère un token aléatoire de 8 chiffres.
 def generateToken():
     return randint(10000000, 99999999)
 
+# Fonction qui insére dans la table des mots de passe oublié le token et le courriel
 def insertTokenAndEmailInForgottenTable(email, token):
     try:
         cmd = 'INSERT INTO forgottenPassword VALUES(\''+email+'\','+str(token)+');'
@@ -162,6 +173,7 @@ def insertTokenAndEmailInForgottenTable(email, token):
     except Exception as e:
         print(e)
 
+# Fonction qui enlève le tuple dans la table des mots de passe oublié le token et le courriel
 def removeTokenAndEmailInForgottenTable(email):
     try:
         cmd = 'DELETE FROM forgottenPassword WHERE email = \''+email+'\';'
@@ -171,6 +183,7 @@ def removeTokenAndEmailInForgottenTable(email):
     except Exception as e:
         print(e)
 
+# Fonction qui vérifie que le token est valide dans la table des mots de passe oubliés
 def checkIfTokenIsValide(email, token : int):
     try:
         storedToken : int
@@ -185,6 +198,7 @@ def checkIfTokenIsValide(email, token : int):
         return True
     return False
 
+#Fonction pour mettre à jour le mot de passe.
 def updatePassword(email, password, salt):
     try:
         cmd = 'UPDATE users SET password = '+password+', salt = \''+salt+'\' WHERE email = \''+email+'\';'
