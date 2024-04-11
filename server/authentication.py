@@ -12,8 +12,8 @@ def signin():
     return render_template('signin.html', error="")
 
 @authentication.route("/signup")
-def signup():
-    return render_template('signup.html')\
+def signup(error =""):
+    return render_template('signup.html', error = error)\
     
 # Logique pour valider la connexion grâce au informations entrée.
 @authentication.route("/login", methods=['POST'])
@@ -49,7 +49,7 @@ def createAccount():
         cur.execute(cmd)
         conn.commit()
     except Exception as e:
-        print(e)
+        return signup("Erreur: Le courriel existe déjà.")
     return signin()
 
 # Prendre note que tant et aussi longtemps que l'utilisateur n'est pas connecter, il n'a pas accès
