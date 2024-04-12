@@ -9,6 +9,9 @@ listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 
 # Cette fonction permet d'être générique pour tout les affichages de tables de produits.
 def display(table, title, page=1):
+    tableData = ""
+    headersData = ""
+    soumissions = ""
     # On s'assure que la table demandé fait partie des tables de produits.
     if table in TABLE_PRODUIT:
         headersData = getHeaders(table)
@@ -17,6 +20,7 @@ def display(table, title, page=1):
         if page <= 0:
             page = 1
         cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur", page)
+        print(cmd)
         try:
             cur=conn.cursor()
             cur.execute(cmd)
@@ -123,17 +127,18 @@ def addItemToSoumission():
     productID = request.form.get('productID', type=int)
     # On viens concaténer l'identifiant produit avec -qty avec de construire la clé avec la quantité du produit
     getQty = ''+str(productID) +'-qty'
-    qty = request.form.get(getQty)
+    qty = request.form.get(getQty, type=int)
+    if qty <= 0:
+        return
     soumissionID = request.form.get('soumissionID')
     try:
         # On appel ensuite la procédure afin d'ajouter un produit à la soumission.
         cmd = 'CALL AjouterSoumission('+str(productID)+', '+str(qty)+', \''+soumissionID+'\');'
-        print(cmd)
         cur.execute(cmd)
         conn.commit()
     except Exception as e:
         print(e)
-    return "Ok"
+    return
 
 
 # Cette fonction permet de genéré un commande SQL à partir d'information injecter.

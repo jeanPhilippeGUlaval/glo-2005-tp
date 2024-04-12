@@ -3,6 +3,7 @@ from database import *
 
 # Fonction qui retourne la liste des soumissions de l'utilisateur actif.
 def getOpenSoumissionList():
+    tableData = ""
     try:
         cmd = 'SELECT * FROM soumission_ids WHERE userID = ' + str(session["id"]) + ' AND envoye = 0;'
         cur=conn.cursor()
@@ -13,6 +14,7 @@ def getOpenSoumissionList():
     return tableData
 
 def getAllSoumissionList():
+    tableData = ""
     try:
         cmd = 'SELECT * FROM soumission_ids WHERE userID = ' + str(session["id"]) +';'
         cur=conn.cursor()
@@ -27,12 +29,12 @@ def getAllSoumissionList():
 # à la page HTML. Cela permet aussi de diminuer la quantité de code à faire à chaque fois qu'on rajoute
 # une table de produit.
 def getHeaders(table):
+    headersData = ""
     try:
         cmd='SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = \''+table+'\' ORDER BY ORDINAL_POSITION;'
         cur=conn.cursor()
         cur.execute(cmd)
         headersData = [row[0] for row in cur.fetchall()]
-        return headersData
     except Exception as e:
         print(e)
-    return
+    return headersData

@@ -136,10 +136,11 @@ def getSoumissionMetadata(soumissionID):
         cur=conn.cursor()
         cur.execute(cmd)
         metadata = cur.fetchone()
-        print(metadata)
     except Exception as e:
         print(e)
-    return metadata[0], metadata[1]
+    if metadata != None:
+        return metadata[0], metadata[1]
+    return 0, 0
 
 
 # Fonction qui calcul le total de la soumission et retourne en format FLOAT. 

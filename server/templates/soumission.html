@@ -9,7 +9,7 @@
     <meta name="author" content="">
 
     <!-- Titre de la page -->
-    <title>Liste de Prix</title>
+    <title>Soumission</title>
 
     <!-- Feuilles de style -->
     <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -42,7 +42,7 @@
           </ul>
           <!-- Liens de navigation à droite -->
           <ul class="nav navbar-nav navbar-right">
-            <li class="active"><a href="#">Soumission</a></li>
+            <li class="active"><a href="/soumission">Soumission</a></li>
             <li><a href="/logout">Déconnexion</a></li>
           </ul>
         </div>
@@ -93,15 +93,15 @@
         </div>
       </div>
     </div>
+    <div class="sub-header">
+      {% if error != '' %}
+      <div class="alert alert-danger" style="width: 70%; margin-left: 20%;" role="alert">
+        <p>{{ error }}</p>
+      </div>
+    </div>
+    {% endif %}
     <!-- Conteneur principal -->
     <div class="container">
-      <div class="sub-header">
-        {% if error != '' %}
-        <div class="alert alert-danger" style="width: 80%; margin-left: 10%;" role="alert">
-          <p>{{ error }}</p>
-        </div>
-      </div>
-      {% endif %}
       <h2 class="sub-header">{{soumissionID}}</h2>
       <h4>Création: {{date}}</h4>
       <div class="table-responsive">
