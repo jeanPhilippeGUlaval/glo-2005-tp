@@ -36,11 +36,3 @@ def getHeaders(table):
     except Exception as e:
         print(e)
     return
-
-# def showPages(page_number, page_size):
-#      # Calculate offset based on page number and page size
-#     offset = (page_number - 1) * page_size
-
-#     # Execute SQL query with pagination
-#     cmd = 
-#     cursor.execute("SELECT * FROM your_table LIMIT ? OFFSET ?", (page_size, offset))
