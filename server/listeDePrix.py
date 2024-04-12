@@ -8,41 +8,56 @@ import re
 listeDePrix = Blueprint('listeDePrix', __name__, template_folder='templates')
 
 # Cette fonction permet d'être générique pour tout les affichages de tables de produits.
-def display(table, title):
+def display(table, title, page=1):
     # On s'assure que la table demandé fait partie des tables de produits.
     if table in TABLE_PRODUIT:
         headersData = getHeaders(table)
         soumissions = getOpenSoumissionList()
-        cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur")
+        # On s'assure que l'on ne dépasse pas les tables
+        if page <= 0:
+            page = 1
+        cmd = getCmdWithHeaders(table, "p.Catégorie, t.Hauteur, t.Largeur", page)
         try:
             cur=conn.cursor()
             cur.execute(cmd)
             tableData = cur.fetchall()
-            return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions)
+            # Si on dépasse le nombre de page nécessaire, on revient à la page d'avant
+            if len(tableData) == 0:
+                return display(table, title, page-1)
+            return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, data=tableData, tableId=table, soumissions=soumissions, page = page)
         except Exception as e:
             print(e)
-    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId="porte", soumissions=soumissions)
+    return render_template("listeDePrix.html", lsDePrix=title, headers= headersData, tableId="porte", soumissions=soumissions, page = page)
 
 # Cette fonction envoi les données de la table porte
 @listeDePrix.route("/listeDePrix/porte", methods=['GET'])
 def displayListeDePrixForPorte():
+    numPage = request.args.get("page", type=int)
+    if numPage == None:
+        numPage = 1
     if session['id'] == None:
         return signin()
-    return display("porte", "Porte de Garage")
+    return display("porte", "Porte de Garage", numPage)
 
 # Cette fonction envoi les données de la table panneaux
 @listeDePrix.route("/listeDePrix/panneaux", methods=['GET'])
 def displayListeDePrixForPanneaux():
+    numPage = request.args.get("page", type=int)
+    if numPage == None:
+        numPage = 1
     if session['id'] == None:
         return signin()
-    return display("panneaux", "Panneaux")
+    return display("panneaux", "Panneaux", numPage)
 
 # Cette fonction envoi les données de la table ferronnerie
 @listeDePrix.route("/listeDePrix/ferronnerie", methods=['GET'])
 def displayListeDePrixForFerronnerie():
+    numPage = request.args.get("page", type=int)
+    if numPage == None:
+        numPage = 1
     if session['id'] == None:
         return signin()
-    return display("ferronnerie", "Ferronnerie")    
+    return display("ferronnerie", "Ferronnerie", numPage)    
 
 # Fonction qui offre la possibilité de recherché sur les catégorie du produit.
 @listeDePrix.route("/listeDePrix/search", methods=['GET'])
@@ -122,12 +137,15 @@ def addItemToSoumission():
 
 
 # Cette fonction permet de genéré un commande SQL à partir d'information injecter.
-def getCmdWithHeaders(table):
-    return 'SELECT p.Catégorie, t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie prix FROM produits) p;'
+# C'est aussi dans ces commandes qu'on gère l'injection des pages.
+def getCmdWithHeaders(table, pageNumber:int):
+    offset = (pageNumber - 1) * 50
+    return 'SELECT p.Catégorie, t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p LIMIT 50 OFFSET '+str(offset)+';'
 
 # Cette fonction permet de genéré un commande SQL à partir d'information injecter. OVERLOAD
-def getCmdWithHeaders(table, orderBy):
-    return 'SELECT p.Catégorie,t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p ORDER BY '+ orderBy + ';'
+def getCmdWithHeaders(table, orderBy, pageNumber:int):
+    offset = (pageNumber - 1) * 50
+    return 'SELECT p.Catégorie,t.*, p.prix FROM ' + table + ' t NATURAL JOIN (SELECT ID, catégorie, prix FROM produits) p ORDER BY '+ orderBy + ' LIMIT 50 OFFSET '+str(offset)+';'
 
 # Cette fonction permet de genéré un commande SQL à partir d'information injecter.
 def getCmdWithHeadersWithSearch(table, search_term, orderBy = ""):

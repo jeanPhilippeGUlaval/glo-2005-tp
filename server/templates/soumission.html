@@ -95,9 +95,11 @@
     </div>
     <!-- Conteneur principal -->
     <div class="container">
-      {% if error != '' %}
-      <div class="alert alert-danger" role="alert">
-        <p>{{ error }}</p>
+      <div class="sub-header">
+        {% if error != '' %}
+        <div class="alert alert-danger" style="width: 80%; margin-left: 10%;" role="alert">
+          <p>{{ error }}</p>
+        </div>
       </div>
       {% endif %}
       <h2 class="sub-header">{{soumissionID}}</h2>
@@ -112,6 +114,7 @@
                 <th>Prix Unitaire</th>
                 <th>Quantité</th>
                 <th>Total</th>
+                <th> </th>
             </tr>
           </thead>
           <tbody>
@@ -121,6 +124,18 @@
                 {% for cell in row %}
                 <td>{{ cell }}</td>
                 {% endfor %}
+                <td>
+                  <!-- Bouton pour enlever un produit de la soumission -->
+                  <form action="/soumission/removeItem" method="post">
+                    <input class="hidden" name="soumissionID" value="{{soumissionID}}"/>
+                    <input class="hidden" name="productID" value="{{row[1]}}"/>
+                    {% if envoye != 1 %}
+                    <button type="submit" >✖</button>
+                    {% else %}
+                    <button type="submit" disabled>✖</button>
+                    {% endif %}
+                  </form>
+                </td>
             </tr>
             {% endfor %}
           </tbody>
@@ -131,11 +146,16 @@
             <h4>:    {{ total }}$</h4>
         </div>
         <!-- Bouton pour supprimer la soumission -->
-        <button type="submit" class="btn btn-danger" onclick="deleteSoumission('{{soumissionID}}')">Supprimer la soumission</button>
         {% if envoye != 1 %}
+        <button type="submit" class="btn btn-danger" onclick="deleteSoumission('{{soumissionID}}')">Supprimer la soumission</button>
+        {% if data|length > 0 %}
         <button type="submit" class="btn btn-success" onclick="sendSoumission('{{soumissionID}}')">Envoyer la soumission</button>
         {% else %}
-        <button type="submit" class="btn btn-success disabled" >Soumission déjà envoyé</button>
+        <button type="submit" class="btn btn-success disabled" disabled>Envoyer la soumission</button>
+        {% endif %}
+        {% else %}
+        <button type="submit" class="btn btn-danger" disabled>Supprimer la soumission</button>
+        <button type="submit" class="btn btn-success disabled" disabled>Soumission déjà envoyé</button>
         {% endif %}
       </div>
     </div>

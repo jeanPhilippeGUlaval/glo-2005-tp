@@ -12,7 +12,7 @@ TABLE_PRODUIT = ["porte","panneaux","ferronnerie"]
 load_dotenv(override=True)
 # On vient gérer la connexion à la base de donnée
 conn = pymysql.connect(
-        host= os.environ.get("HOST"),
+        host= os.environ.get("BDHOST"),
         user= os.environ.get("USER"),
         password= os.environ.get("PASSWORD"),
         db= os.environ.get("DATABASE") )

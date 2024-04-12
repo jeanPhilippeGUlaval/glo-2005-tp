@@ -15,6 +15,8 @@ soumission = Blueprint('soumission', __name__, template_folder='templates')
 # Fonction qui affiche la page principal des soumissions d'un utilisateur.
 @soumission.route("/soumission", methods=["GET"])
 def displaySoumissionID(soumissionID ="", erreur = ""):
+    envoye = 0
+    date = 0
     if session['id'] == None:
         return signin()
     if soumissionID == "":
@@ -97,6 +99,22 @@ def envoyeSoumission():
         if erreur != "":
             return displaySoumissionID("",erreur)
     return displaySoumissionID()
+
+
+# Fonction pour enlever un item de ka soumission.
+@soumission.route("/soumission/removeItem", methods=['POST'])
+def deleteItemFromSoumission():
+    if session['id'] == None:
+        return signin()
+    SoumissionID = request.form.get('soumissionID')
+    productID = request.form.get('productID', type=int)
+    try:
+        cmd = 'DELETE FROM soumission_asso_produits WHERE sID = \''+ SoumissionID +'\' AND ProductID = '+str(productID)+';'
+        cur.execute(cmd)
+        conn.commit()
+    except Exception as e:
+        displaySoumissionID(SoumissionID, "Une erreure s'est produite, veuillez rafraichir la page et réessayer.")
+    return displaySoumissionID(SoumissionID)
 
 # Fonction qui retourne les informations d'une soumission spécifique.
 def getData(soumissionID):

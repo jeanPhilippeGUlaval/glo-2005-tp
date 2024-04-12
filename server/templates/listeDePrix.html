@@ -125,6 +125,11 @@
           {% endfor %}
         </tbody>
       </table>
+      <div>
+        <!-- Bouton pour la gestion des pages -->
+          <button type="submit" class="btn btn-sm btn-info" name="page" onclick="PagePrec('{{tableId}}','{{page}}')"> &lt Page Précédente</button>
+          <button type="submit" class="btn btn-sm btn-info" name="page" onclick="PageSuivante('{{tableId}}','{{page}}')">Page Suivante ></button>
+      </div>
     </div>
   </div>
 
