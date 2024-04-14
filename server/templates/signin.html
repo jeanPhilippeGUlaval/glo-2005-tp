@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Métadonnées -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../favicon.ico">
+
+    <!-- Titre de la page -->
+    <title>Se Connecter</title>
+
+    <!-- Feuilles de style -->
+    <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <link href="../static/css/signin.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="../static/assets/js/ie-emulation-modes-warning.js"></script>
+    <script type="text/javascript" src="../static/js/authentication.js"></script>
+
+  </head>
+
+  <body>
+
+    <div class="container">
+      <!-- Affichage de messages d'erreur s'il y en a -->
+      {% if error != '' %}
+      <div class="alert alert-danger" role="alert">
+        <p>{{ error }}</p>
+      </div>
+      {% endif %}
+      {% if info != '' %}
+      <div class="alert alert-info" role="alert">
+        <p>{{ info }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Formulaire de connexion -->
+      <form class="form-signin" action="login" method="post">
+        <h2 class="form-signin-heading">Se Connecter</h2>
+        <!-- Champ pour l'adresse email -->
+        <label for="inputEmail" class="sr-only">Addresse Courriel</label>
+        <input type="email" name="inputEmail" id="inputEmail" class="form-control" placeholder="Addresse Courriel" required autofocus>
+        <!-- Champ pour le mot de passe -->
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Mot de Passe" required>
+        <div class="checkbox">
+        </div>
+        <!-- Bouton pour se connecter -->
+        <button class="btn btn-lg btn-primary btn-block" type="submit" value="Login">Se connecter</button>
+        <!-- Bouton pour aller à la page de création de compte -->
+        <button class="btn btn-lg btn-info btn-block" type="submit" onclick="GotoSignUp()">Créer un compte</button>
+        <button class="btn btn-sm btn-warning btn-block"  onclick="GoToForgotPassword()">J'ai oublié mon mot de passe</button>
+      </form>
+
+    </div> 
+
+    <!-- Scripts -->
+    <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

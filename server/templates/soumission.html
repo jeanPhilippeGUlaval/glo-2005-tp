@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Métadonnées -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Titre de la page -->
+    <title>Soumission</title>
+
+    <!-- Feuilles de style -->
+    <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <link href="../static/css/navbar-static-top.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="../static/assets/js/ie-emulation-modes-warning.js"></script>
+
+  </head>
+  <body>
+    <!-- Barre de navigation supérieure -->
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <!-- Bouton de navigation pour les écrans plus petits -->
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!-- Marque de l'entreprise -->
+          <a class="navbar-brand" href="/home">Entreprise X</a>
+        </div>
+        <!-- Liens de navigation -->
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/listeDePrix/porte">Liste de produits</a></li>
+          </ul>
+          <!-- Liens de navigation à droite -->
+          <ul class="nav navbar-nav navbar-right">
+            <li class="active"><a href="/soumission">Soumission</a></li>
+            <li><a href="/logout">Déconnexion</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Barre latérale -->
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar">
+        <h3>Soumissions</h3>
+        <!-- Bouton pour créer une nouvelle soumission -->
+        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Créer une soumission</button>
+        <!-- Liste des soumissions existantes -->
+        {% for soumissionID in lsSoumission %}
+          <div>
+            <li><a href="/soumission?id={{ soumissionID }}">{{ soumissionID }}</a></li>
+          </div>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Modal de création de soumission -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <!-- Bouton de fermeture -->
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <!-- Titre du modal -->
+            <h4 class="modal-title" id="myModalLabel">Créer une soumission</h4>
+          </div>
+          <!-- Formulaire de création de soumission -->
+          <form class="form-add-soumission" action="/soumission/addSoumission" method="post">
+            <div class="modal-body">
+              <p>Entrez l'identifiant de la soumission</p>
+              <!-- Message d'avertissement -->
+              <div class="alert alert-warning" role="alert">Aucun espace est accepté. Seulement des caractères.</div>
+              <!-- Champ pour l'identifiant de la soumission -->
+              <input name="inputSoumissionID" id="inputSoumissionID" class="form-control" placeholder="Identifiant de la soumission" required autofocus>
+            </div>
+            <div class="modal-footer">
+              <!-- Bouton de fermeture -->
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <!-- Bouton pour enregistrer les modifications -->
+              <button class="btn btn-primary" type="submit" value="/soumission/addSoumission">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="sub-header">
+      {% if error != '' %}
+      <div class="alert alert-danger" style="width: 70%; margin-left: 20%;" role="alert">
+        <p>{{ error }}</p>
+      </div>
+    </div>
+    {% endif %}
+    <!-- Conteneur principal -->
+    <div class="container">
+      <h2 class="sub-header">{{soumissionID}}</h2>
+      <h4>Création: {{date}}</h4>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+                <th>Produits</th>
+                <th>ID Produits</th>
+                <th>Catégorie</th>
+                <th>Prix Unitaire</th>
+                <th>Quantité</th>
+                <th>Total</th>
+                <th> </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Boucle pour afficher les données -->
+            {% for row in data %}
+            <tr>
+                {% for cell in row %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+                <td>
+                  <!-- Bouton pour enlever un produit de la soumission -->
+                  <form action="/soumission/removeItem" method="post">
+                    <input class="hidden" name="soumissionID" value="{{soumissionID}}"/>
+                    <input class="hidden" name="productID" value="{{row[1]}}"/>
+                    {% if envoye != 1 %}
+                    <button type="submit" >✖</button>
+                    {% else %}
+                    <button type="submit" disabled>✖</button>
+                    {% endif %}
+                  </form>
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <!-- Affichage du total -->
+        <div class="total">
+            <h4>Total</h4>
+            <h4>:    {{ total }}$</h4>
+        </div>
+        <!-- Bouton pour supprimer la soumission -->
+        {% if envoye != 1 %}
+        <button type="submit" class="btn btn-danger" onclick="deleteSoumission('{{soumissionID}}')">Supprimer la soumission</button>
+        {% if data|length > 0 %}
+        <button type="submit" class="btn btn-success" onclick="sendSoumission('{{soumissionID}}')">Envoyer la soumission</button>
+        {% else %}
+        <button type="submit" class="btn btn-success disabled" disabled>Envoyer la soumission</button>
+        {% endif %}
+        {% else %}
+        <button type="submit" class="btn btn-danger" disabled>Supprimer la soumission</button>
+        <button type="submit" class="btn btn-success disabled" disabled>Soumission déjà envoyé</button>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../static/assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../static/dist/js/bootstrap.min.js"></script>
+    <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="../static/js/soumission.js"></script>
+  </body>
+</html>

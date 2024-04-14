@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Métadonnées -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../favicon.ico">
+
+    <!-- Titre de la page -->
+    <title>Créer un compte</title>
+
+    <!-- Feuilles de style -->
+    <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <link href="../static/css/signup.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="../static/assets/js/ie-emulation-modes-warning.js"></script>
+    <script type="text/javascript" src="../static/js/authentication.js"></script>
+
+
+  </head>
+
+  <body>
+
+    <div class="container">
+      {% if error != '' %}
+      <div class="alert alert-danger" role="alert">
+        <p>{{ error }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Formulaire de création de compte -->
+      <form class="form-signin" action="createAccount" method="post">
+        <!-- Titre du formulaire -->
+        <h2 class="form-signin-heading">Créer un compte</h2>
+        <div>
+          <!-- Champ pour l'adresse email -->
+          <label for="inputEmail" class="sr-only">Addresse Courriel</label>
+          <input type="email" name="inputEmail" id="inputEmail" class="form-control" onchange="validate()" onkeyup="validateEmail()" placeholder="Addresse Courriel" required autofocus>
+          <!-- Champ pour le mot de passe -->
+          <label for="inputPassword" class="sr-only">Password</label>
+          <input type="password" name="inputPassword" id="inputPassword" class="form-control" onchange="validate()" onkeyup="validateMDP()" placeholder="Mot de Passe" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+          <!-- Champ pour la confirmation du mot de passe -->
+          <input type="password" id="inputPasswordRepeat" class="form-control" onchange="validate()" onkeyup="validateRepeat()" placeholder="Confirmer le mot de passe" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+        </div>
+        <!-- Affichage des critères de mot de passe -->
+        <div id="message">
+          <p>Le mot de passe de contenir:</p>
+          <p id="letter" class="invalid">Une lettre <b>minuscule</b></p>
+          <p id="capital" class="invalid">Une lettre <b>majuscule</b></p>
+          <p id="number" class="invalid">Un <b>chiffre</b></p>
+          <p id="length" class="invalid">Minimum <b>8 caractères</b></p>
+        </div>
+        <!-- Bouton pour créer un compte (initiallement désactivé) -->
+        <button id="createAccount" class="btn btn-lg btn-info btn-block" type="submit" disabled="true" value="Identification">Créer un compte</button>
+        <!-- Bouton pour aller à la page de connexion -->
+        <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="GotoSignIn()">Se connecter</button>
+
+      </form>
+
+    </div> <!-- /container -->
+
+    <!-- Scripts -->
+    <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+    <!-- Appel de la fonction validate() pour valider le formulaire -->
+    <script>validate()</script>
+  </body>
+</html>

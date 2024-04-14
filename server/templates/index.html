@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Balises meta pour le jeu de caractères, la compatibilité, le viewport et la description -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Titre de la page -->
+  <title>Entreprise X</title>
+
+  <!-- CSS Bootstrap -->
+  <link href="../static/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- CSS supplémentaire pour contourner le bug du viewport IE10 et styles personnalisés -->
+  <link href="../static/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+  <link href="../static/css/navbar-static-top.css" rel="stylesheet">
+
+  <!-- Script pour avertir des modes d'émulation IE -->
+  <script src="../static/assets/js/ie-emulation-modes-warning.js"></script>
+</head>
+
+<body>
+  <!-- Barre de navigation -->
+  <nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- Bouton de bascule de la barre de navigation pour les écrans plus petits -->
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Basculer la navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <!-- Marque/logo -->
+        <a class="navbar-brand" href="#">Entreprise X</a>
+      </div>
+      <!-- Liens de la barre de navigation -->
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <!-- Élément de menu pour la liste des produits -->
+          <li><a href="/listeDePrix/porte">Liste de produits</a></li>
+        </ul>
+        <!-- Éléments de menu alignés à droite -->
+        <ul class="nav navbar-nav navbar-right">
+          <!-- Élément de menu pour la soumission -->
+          <li><a href="soumission">Soumission</a></li>
+          <!-- Élément de menu pour la déconnexion -->
+          <li><a href="/logout">Déconnexion</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Conteneur principal -->
+  <div class="container">
+    <!-- Composant principal pour un message marketing principal ou un appel à l'action -->
+    <div class="jumbotron">
+      <!-- Titre principal -->
+      <h1>Travail Pratique GLO-2005</h1>
+      <!-- Description -->
+      <p>Ceci est un TP pour le cours de GLO-2005 2024</p>
+    </div>
+  </div>
+
+  <!-- Bibliothèque jQuery -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+  <!-- Alternative si jQuery n'est pas disponible -->
+  <script>window.jQuery || document.write('<script src="../static/assets/js/vendor/jquery.min.js"><\/script>')</script>
+  <!-- JavaScript Bootstrap -->
+  <script src="../static/dist/js/bootstrap.min.js"></script>
+  <!-- JavaScript personnalisé pour la fonctionnalité de la liste des produits -->
+  <script src="../static/js/listeDePrix.js"></script>
+  <!-- JavaScript supplémentaire pour contourner le bug du viewport IE10 -->
+  <script src="../static/assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+</html>
