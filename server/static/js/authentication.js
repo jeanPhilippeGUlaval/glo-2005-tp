@@ -1,20 +1,17 @@
+// Fonction qui fait fait un appel pour afficher la page de création de compte
 function GotoSignUp()
 {
     location.href = "signup";
 }
-
+// Fonction qui fait fait un appel pour afficher la page de connexion
 function GotoSignIn()
 {
     location.href = "signin";
 }
+// Fonction qui fait fait un appel pour afficher la page d'oubli de mot de passe
 function GoToForgotPassword()
 {
     location.href = "forgotPassword"
-}
-
-function createAnAccount()
-{
-    location.href = "createAccount";
 }
 
 function noPadding()
@@ -22,6 +19,8 @@ function noPadding()
     document.getElementById("inputPassword").style.marginBottom="-1";
 }
 
+// Permet qu'à chaque fois que nous entrons une touche dans la boite de mot de passe, nous relançons la vérification afin
+// de s'assurer que tout les critère soit rempli.
 function validateChangePassword()
 {
     var myInput = document.getElementById("inputPassword");
@@ -41,6 +40,8 @@ function validateChangePassword()
     }
 }
 
+// Permet qu'à chaque fois que nous entrons une touche dans la boite de mot de passe, nous relançons la vérification afin
+// de s'assurer que tout les critère soit rempli ainsi que l'adresse courriel
 function validate()
 {
     var myInput = document.getElementById("inputPassword");
@@ -60,6 +61,7 @@ function validate()
     }
 }
 
+// Permet de valider que le courriel concorde avec la REGEX d'adresse courriel
 function validateEmail()
 {
     var email = document.getElementById("inputEmail");
@@ -71,6 +73,7 @@ function validateEmail()
     }
 }
 
+// Permet de valider le mot passe afin qu'il concorde au requis voulu.
 function validateMDP()
 {
     var letter = document.getElementById("letter");
@@ -94,6 +97,7 @@ function validateMDP()
         repeatOk = true;
     }
 
+    // Validation des lettres minuscules
     var lowerCaseLetters = /[a-z]/g;
     if(myInput.value.match(lowerCaseLetters)) {
         letter.classList.remove("invalid");
@@ -106,7 +110,7 @@ function validateMDP()
         letter.classList.add("invalid");
     }
 
-    // Validate capital letters
+    // Validation des lettres majuscules
     var upperCaseLetters = /[A-Z]/g;
     if(myInput.value.match(upperCaseLetters)) {
         capital.classList.remove("invalid");
@@ -119,7 +123,7 @@ function validateMDP()
         myInput.style.borderColor="#EF5350";
     }
 
-    // Validate numbers
+    // Validation des nombre
     var numbers = /[0-9]/g;
     if(myInput.value.match(numbers)) {
         number.classList.remove("invalid");
@@ -132,7 +136,7 @@ function validateMDP()
         number.classList.add("invalid");
     }
 
-    // Validate length
+    // Validation de la longueur
     if(myInput.value.length >= 8) {
         length.classList.remove("invalid");
         myInput.style.borderColor="";
@@ -143,6 +147,7 @@ function validateMDP()
         myInput.style.borderColor="#EF5350";
         length.classList.add("invalid");
     }
+    // Si tout est valide, retourne vrai
     if (lowerOK && numberOK && upperOK && lengthOK)
     {
         return true;
@@ -150,6 +155,7 @@ function validateMDP()
     return false
 }
 
+//Validation que le mot de passe est revérifier une deuxième fois.
 function validateRepeat()
 {
     var myInput = document.getElementById("inputPassword");

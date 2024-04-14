@@ -1,14 +1,22 @@
 CREATE DATABASE dev;
 USE dev;
 CREATE TABLE users(ID int PRIMARY KEY AUTO_INCREMENT, email varchar(256) UNIQUE, password varchar(64), salt varchar(32));
+CREATE INDEX email_index on users(email);
+
 CREATE TABLE forgottenPassword(email varchar(256) UNIQUE, token int);
+CREATE INDEX email_index on forgottenPassword(email)
 
 CREATE TABLE produits(ID INT AUTO_INCREMENT PRIMARY KEY, TAG VARCHAR(70), Catégorie varchar(30), prix int);
+CREATE FULLTEXT INDEX categorie_fulltext_index ON produits(Catégorie);
+
 CREATE TABLE porte (ID int, Largeur int, Hauteur int, isolation varchar(4), Motif int, Ferronerie varchar(24), Alliage varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
 CREATE TABLE panneaux(ID int, Largeur int, Hauteur int, isolation varchar(4), Modele varchar(255), Alliage varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
 CREATE TABLE ferronnerie(ID int, Largeur int, Hauteur int, Diametre varchar(6), Type varchar(24), FOREIGN KEY (ID) REFERENCES produits(ID) ON DELETE CASCADE);
 
 CREATE TABLE soumission_ids (ID VARCHAR(24) PRIMARY KEY, userID int, dateSoumission TIMESTAMP DEFAULT CURRENT_TIMESTAMP, envoye int DEFAULT (0), FOREIGN KEY(userID) REFERENCES users(ID) ON DELETE CASCADE);
+CREATE INDEX envoye_index ON soumission_ids(envoye);
+CREATE INDEX usersID_index ON soumission_ids(usersID);
+
 
 CREATE TABLE soumission_asso_produits(sID VARCHAR(24),
 ProductID int NOT NULL,
@@ -16,6 +24,8 @@ sQuantite int NOT NULL,
 sTotal DECIMAL,
 FOREIGN KEY (ProductID) REFERENCES produits(ID) ON DELETE CASCADE,
 FOREIGN KEY (sID) REFERENCES soumission_ids(ID) ON DELETE CASCADE);
+CREATE INDEX ProductID_index_SAP ON soumission_asso_produits(ProductID);
+CREATE INDEX sID_index_SAP ON soumission_asso_produits(sID);
 
 /*
     Cette Procédure s'occupe d'ajouter des items dans la table d'association de soumission avec produit.
